@@ -78,6 +78,31 @@
     "button": "Settings",
     "open": "Open settings",
     "title": "Settings",
-    "description": "Configure the monitoring scheduler. Defaults to every 6 hours (production-realistic, fits SerpAPI free tier)."
+    "description": "Manage tracked keywords and the monitoring scheduler. Defaults: every 6 hours, single keyword."
+  },
+  "keyword": {
+    "title": "Tracked keywords",
+    "hint": "Each keyword is monitored on every scheduler tick. Switch which one the dashboard shows from the header.",
+    "addNew": "Add new keyword",
+    "query": "Query",
+    "geo": "Geo",
+    "brand": "Brand domain",
+    "add": "Add",
+    "delete": "Delete keyword",
+    "cannotDeleteLast": "Cannot delete the last remaining keyword",
+    "none": "No keywords",
+    "error": "Error"
+  },
+  "group": {
+    "label": "Group by",
+    "none": "None",
+    "category": "Category",
+    "redirect": "Resolved domain",
+    "confidence": {
+      "label": "Confidence",
+      "high": "High (≥0.85)",
+      "medium": "Medium (0.50–0.85)",
+      "low": "Low (<0.50)"
+    }
   }
 }

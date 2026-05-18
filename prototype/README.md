@@ -77,6 +77,14 @@ npm run dashboard           # вже включає scheduler з default cron "0
 - **Stop** — зупинити scheduler (попередні snapshots залишаються)
 - **Status:** active/stopped, current cron, last run timestamp, duration, busy state, last error
 
+**Multi-keyword:**
+Scheduler **проходить по всіх keywords у БД** при кожному tick. Default — `starcasino` / Netherlands / `starcasino.nl` (auto-seeded при першому запуску). Додаткові keywords додаються через Settings drawer (фа "Tracked keywords"): `query`, `geo`, `brand domain`. Кожен keyword має окрему серію snapshots і незалежну time-series. Selector у хедері поряд з заголовком перемикає поточний вид.
+
+> SerpAPI free tier = 100 запитів/міс. На 6-годинному cron × N keywords = N × 120/міс. Для 5 keywords потрібен paid tier або перейти на DataForSEO.
+
+**Table grouping:**
+Над таблицею топ-10 — toolbar "Group by": None / Category / Resolved domain / Confidence. Категорія = візуальна група за класифікацією; Resolved domain = за кінцевим redirect; Confidence = high/medium/low. Default — None (flat table).
+
 **Env override:**
 - `MONITOR_CRON="*/30 * * * * *"` — будь-який валідний cron (6 fields = з секундами)
 - `MONITOR_CRON=off` — вимкнути auto-start (UI може запустити вручну)
@@ -134,7 +142,10 @@ Dashboard на `http://localhost:3000` показує:
 | GET | `/api/monitor/status` | Scheduler status: active, cron, lastRunAt, duration, busy, lastError |
 | POST | `/api/monitor/start` | `{ cron: "*/5 * * * *" }` → start/replace scheduler |
 | POST | `/api/monitor/stop` | Stop scheduler (preserves history) |
-| POST | `/api/monitor/trigger` | One-off immediate analyze tick (non-blocking) |
+| POST | `/api/monitor/trigger` | One-off immediate analyze tick — iterates over ALL keywords |
+| GET | `/api/keywords` | List tracked keywords (auto-seeds default on first call) |
+| POST | `/api/keywords` | `{ query, geo, brand }` → add new |
+| DELETE | `/api/keywords/:id` | Cascade delete: snapshots + classifications + history |
 
 ---
 

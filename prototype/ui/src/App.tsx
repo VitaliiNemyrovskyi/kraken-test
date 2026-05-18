@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { CategoryPie } from "./components/CategoryPie";
@@ -7,6 +7,7 @@ import { DomainsTable } from "./components/DomainsTable";
 import { HistoryChart } from "./components/HistoryChart";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { SettingsSheet } from "./components/SettingsSheet";
+import { KeywordSelector, type Keyword } from "./components/KeywordSelector";
 import type { HistoryResponse, Summary, SnapshotResponse } from "./types";
 
 async function fetchJSON<T>(url: string): Promise<T> {
@@ -15,19 +16,43 @@ async function fetchJSON<T>(url: string): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+const SELECTED_KEY = "kraken_selected_keyword_id";
+
 export function App() {
   const { t, i18n } = useTranslation();
+  const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [selected, setSelected] = useState<Keyword | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [snapshot, setSnapshot] = useState<SnapshotResponse["snapshot"]>(null);
   const [history, setHistory] = useState<HistoryResponse["points"]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  // Load keyword list (initial + after changes from Settings)
+  const loadKeywords = useCallback(async () => {
+    const data = await fetchJSON<{ keywords: Keyword[] }>("/api/keywords");
+    setKeywords(data.keywords);
+    setSelected((prev) => {
+      if (prev && data.keywords.find((k) => k.id === prev.id)) return prev;
+      const savedId = Number(localStorage.getItem(SELECTED_KEY));
+      const saved = data.keywords.find((k) => k.id === savedId);
+      return saved ?? data.keywords[0] ?? null;
+    });
+  }, []);
+
   useEffect(() => {
+    void loadKeywords().catch((e: Error) => setError(e.message));
+  }, [loadKeywords]);
+
+  // Reload summary/snapshot/history whenever selection changes; poll every 10s.
+  useEffect(() => {
+    if (!selected) return;
+    localStorage.setItem(SELECTED_KEY, String(selected.id));
+    const qs = `query=${encodeURIComponent(selected.query)}&geo=${encodeURIComponent(selected.geo)}`;
     const load = () =>
       Promise.all([
-        fetchJSON<Summary>("/api/summary"),
-        fetchJSON<SnapshotResponse>("/api/latest"),
-        fetchJSON<HistoryResponse>("/api/history?limit=30"),
+        fetchJSON<Summary>(`/api/summary?${qs}`),
+        fetchJSON<SnapshotResponse>(`/api/latest?${qs}`),
+        fetchJSON<HistoryResponse>(`/api/history?${qs}&limit=30`),
       ])
         .then(([s, l, h]) => {
           setSummary(s);
@@ -35,12 +60,10 @@ export function App() {
           setHistory(h.points);
         })
         .catch((e: Error) => setError(e.message));
-
     void load();
-    // Auto-refresh every 10s so live monitor runs update the chart
     const id = setInterval(() => void load(), 10000);
     return () => clearInterval(id);
-  }, []);
+  }, [selected]);
 
   if (error) {
     return (
@@ -54,7 +77,7 @@ export function App() {
     );
   }
 
-  if (!summary) {
+  if (!summary || !selected) {
     return (
       <div className="mx-auto max-w-7xl px-6 py-10 text-muted-foreground">
         {t("state.loading")}
@@ -68,10 +91,15 @@ export function App() {
     <div className="mx-auto max-w-7xl px-6 py-8">
       <header className="mb-8 flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{t("header.title")}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("header.query")} <span className="font-mono">"{summary.query}"</span> •{" "}
-            {t("header.geo")} <span className="font-mono">{summary.geo}</span> •{" "}
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight">{t("header.title")}</h1>
+            <KeywordSelector
+              keywords={keywords}
+              selected={selected}
+              onSelect={setSelected}
+            />
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
             {snapshot ? (
               <>
                 {t("header.snapshot")}{" "}
@@ -85,7 +113,11 @@ export function App() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <SettingsSheet locale={locale} />
+          <SettingsSheet
+            locale={locale}
+            keywords={keywords}
+            onKeywordsChange={() => void loadKeywords()}
+          />
           <LanguageSwitcher />
         </div>
       </header>

@@ -86,11 +86,12 @@ OUTPUT FORMAT — strict JSON, no prose, no markdown:
   "signals_observed": ["…", "…"]
 }`;
 
-export function buildUserPrompt(page: ScrapedPage): string {
+export function buildUserPrompt(page: ScrapedPage, brandDomain: string): string {
   const outboundDomains = Array.from(
     new Set(page.outboundLinks.filter((l) => l.isExternal).map((l) => l.domain)),
   ).slice(0, 10);
   const textSnippet = page.mainText.slice(0, 1500);
+  const brandStem = brandDomain.split(".")[0] ?? brandDomain;
   return JSON.stringify(
     {
       pageDomain: page.pageDomain,
@@ -104,7 +105,8 @@ export function buildUserPrompt(page: ScrapedPage): string {
       outboundDomainsTop10: outboundDomains,
       hasAffiliateDisclosure: page.hasAffiliateDisclosure,
       mainTextSnippet: textSnippet,
-      brand: "starcasino",
+      brand: brandStem,
+      brandDomain,
     },
     null,
     2,

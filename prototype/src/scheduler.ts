@@ -1,5 +1,5 @@
 import cron, { type ScheduledTask } from "node-cron";
-import { runAnalyze } from "./analyze/run.js";
+import { runAnalyzeAllKeywords } from "./analyze/run.js";
 
 export interface SchedulerStatus {
   active: boolean;
@@ -57,12 +57,12 @@ class Scheduler {
     const t0 = Date.now();
     try {
       console.log(`[scheduler] tick (${reason}) at ${new Date().toISOString()}`);
-      const result = await runAnalyze();
+      const results = await runAnalyzeAllKeywords();
       this.lastRunAt = new Date().toISOString();
       this.lastRunDurationMs = Date.now() - t0;
       this.lastRunError = null;
       console.log(
-        `[scheduler] done — snapshot #${result.snapshotId} (${result.total} results, ${this.lastRunDurationMs}ms)`,
+        `[scheduler] done — ${results.length} keyword(s) analyzed (${this.lastRunDurationMs}ms)`,
       );
     } catch (err) {
       this.lastRunError = (err as Error).message;

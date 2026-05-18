@@ -2,13 +2,17 @@ import Fastify, { type FastifyInstance } from "fastify";
 import fastifyStatic from "@fastify/static";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { z } from "zod";
 import { config } from "../config.js";
 import { scheduler } from "../scheduler.js";
 import {
+  addKeyword,
+  deleteKeyword,
   getCategorySummary,
   getDomainsByCategory,
   getHistory,
   getLatestSnapshot,
+  listKeywords,
 } from "../storage/db.js";
 import type { Category } from "../types.js";
 
@@ -93,6 +97,41 @@ export async function createApp(): Promise<FastifyInstance> {
     // Run async — return immediately so UI doesn't time out on a slow analyze.
     void scheduler.tick("manual");
     return { ok: true, status: scheduler.status() };
+  });
+
+  // ───── Keyword management ─────
+  app.get("/api/keywords", async () => {
+    const items = listKeywords();
+    // Seed default if empty so the UI always has at least one selection.
+    if (items.length === 0) {
+      const def = addKeyword(config.QUERY, config.GEO, config.BRAND_DOMAIN);
+      return { keywords: [def] };
+    }
+    return { keywords: items };
+  });
+
+  const newKeywordSchema = z.object({
+    query: z.string().min(1).max(200),
+    geo: z.string().min(2).max(100),
+    brand: z.string().min(3).max(200),
+  });
+
+  app.post("/api/keywords", async (req, reply) => {
+    const parsed = newKeywordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ ok: false, error: parsed.error.flatten() });
+    }
+    const kw = addKeyword(parsed.data.query, parsed.data.geo, parsed.data.brand);
+    return { ok: true, keyword: kw };
+  });
+
+  app.delete("/api/keywords/:id", async (req, reply) => {
+    const id = Number.parseInt((req.params as { id: string }).id, 10);
+    if (!Number.isFinite(id)) {
+      return reply.code(400).send({ ok: false, error: "invalid_id" });
+    }
+    const removed = deleteKeyword(id);
+    return reply.code(removed ? 200 : 404).send({ ok: removed });
   });
 
   return app;

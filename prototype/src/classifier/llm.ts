@@ -28,6 +28,7 @@ function getClient(): OpenAI {
 
 export async function classifyWithLlm(
   page: ScrapedPage,
+  brandDomain: string,
 ): Promise<LlmVerdict | null> {
   if (!llmEnabled) return null;
   try {
@@ -35,7 +36,7 @@ export async function classifyWithLlm(
       model: config.OPENROUTER_MODEL,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserPrompt(page) },
+        { role: "user", content: buildUserPrompt(page, brandDomain) },
       ],
       response_format: { type: "json_object" },
       temperature: 0.1,

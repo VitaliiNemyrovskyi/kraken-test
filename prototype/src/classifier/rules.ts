@@ -4,17 +4,27 @@ import {
   BRAND_IN_ANCHOR_RE,
   COMPETITOR_CASINO_DOMAINS,
 } from "../constants.js";
-import { config } from "../config.js";
 import type { OutboundLink, RuleSignals, ScrapedPage } from "../types.js";
-
-const BRAND_MENTION_RE = /star\s*casino/gi;
 
 function hasAffiliateParam(href: string): boolean {
   return AFFILIATE_PARAM_RE.test(href) || AFFILIATE_UTM_RE.test(href);
 }
 
-export function extractSignals(page: ScrapedPage): RuleSignals {
-  const brandDomain = config.BRAND_DOMAIN;
+function brandMentionRegex(brandDomain: string): RegExp {
+  // "starcasino.nl" → /star\s*casino/gi  (strip TLD, treat boundary between
+  // brand-name segments as optional whitespace so "Star Casino" and
+  // "StarCasino" both match).
+  const stem = brandDomain.split(".")[0] ?? brandDomain;
+  // Split CamelCase / alphanumeric runs heuristically: most casino brands are
+  // run-together strings, so we just escape and allow whitespace inside.
+  const escaped = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`${escaped}`.replace(/([a-z])([a-z])/i, "$1\\s*$2"), "gi");
+}
+
+export function extractSignals(
+  page: ScrapedPage,
+  brandDomain: string,
+): RuleSignals {
   const links = page.outboundLinks;
   const externalLinks = links.filter((l) => l.isExternal);
   const totalLinks = externalLinks.length || 1;
@@ -31,7 +41,7 @@ export function extractSignals(page: ScrapedPage): RuleSignals {
     hasAffiliateParam(l.href),
   );
 
-  const brandMentionsInText = (page.mainText.match(BRAND_MENTION_RE) ?? []).length;
+  const brandMentionsInText = (page.mainText.match(brandMentionRegex(brandDomain)) ?? []).length;
 
   // Cloaking detection: anchor text references the brand, but the CTA resolves
   // to a competitor casino. Strong thief signal.

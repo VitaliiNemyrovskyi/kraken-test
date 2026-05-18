@@ -24,6 +24,45 @@ function getOrCreateKeyword(query: string, geo: string, brand: string): number {
   return Number(info.lastInsertRowid);
 }
 
+export interface Keyword {
+  id: number;
+  query: string;
+  geo: string;
+  brand: string;
+}
+
+export function listKeywords(): Keyword[] {
+  return db.prepare("SELECT id, query, geo, brand FROM keywords ORDER BY id ASC").all() as Keyword[];
+}
+
+export function addKeyword(query: string, geo: string, brand: string): Keyword {
+  const id = getOrCreateKeyword(query, geo, brand);
+  return { id, query, geo, brand };
+}
+
+export function deleteKeyword(id: number): boolean {
+  // Cascade: drop associated history + snapshots + results + classifications.
+  const tx = db.transaction(() => {
+    const snapshotIds = db
+      .prepare("SELECT id FROM snapshots WHERE keyword_id = ?")
+      .all(id) as { id: number }[];
+    for (const s of snapshotIds) {
+      const resultIds = db
+        .prepare("SELECT id FROM serp_results WHERE snapshot_id = ?")
+        .all(s.id) as { id: number }[];
+      for (const r of resultIds) {
+        db.prepare("DELETE FROM classifications WHERE result_id = ?").run(r.id);
+      }
+      db.prepare("DELETE FROM serp_results WHERE snapshot_id = ?").run(s.id);
+    }
+    db.prepare("DELETE FROM snapshots WHERE keyword_id = ?").run(id);
+    db.prepare("DELETE FROM domain_history WHERE keyword_id = ?").run(id);
+    const info = db.prepare("DELETE FROM keywords WHERE id = ?").run(id);
+    return info.changes > 0;
+  });
+  return tx();
+}
+
 export function saveSnapshot(
   query: string,
   geo: string,

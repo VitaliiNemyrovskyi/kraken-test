@@ -10,9 +10,12 @@ import { extractFromHtml, etld1 } from "./extractors.js";
 import { waitForDomain } from "./rate-limiter.js";
 import { loadFixture } from "../serp/mock-provider.js";
 
-function categoriseCtaTarget(finalDomain: string | null): ScrapedPage["primaryCtaTarget"] {
+function categoriseCtaTarget(
+  finalDomain: string | null,
+  brandDomain: string,
+): ScrapedPage["primaryCtaTarget"] {
   if (!finalDomain) return null;
-  if (finalDomain === config.BRAND_DOMAIN) return "star";
+  if (finalDomain === brandDomain) return "star";
   if (COMPETITOR_CASINO_DOMAINS.has(finalDomain)) return "competitor";
   return "other";
 }
@@ -84,16 +87,17 @@ async function resolveRedirectChain(
 
 export interface ScrapeOptions {
   useMockFixture?: boolean;
+  brandDomain: string;
 }
 
 export async function scrapePage(
   serpResult: SerpResult,
-  opts: ScrapeOptions = {},
+  opts: ScrapeOptions,
 ): Promise<ScrapedPage> {
   if (opts.useMockFixture) {
     return scrapeFromFixture(serpResult);
   }
-  return scrapeViaPlaywright(serpResult);
+  return scrapeViaPlaywright(serpResult, opts.brandDomain);
 }
 
 function scrapeFromFixture(serpResult: SerpResult): ScrapedPage {
@@ -143,6 +147,7 @@ function scrapeFromFixture(serpResult: SerpResult): ScrapedPage {
 
 async function scrapeViaPlaywright(
   serpResult: SerpResult,
+  brandDomain: string,
 ): Promise<ScrapedPage> {
   const fetchedAt = new Date().toISOString();
   await waitForDomain(serpResult.domain, config.SCRAPER_RATE_PER_DOMAIN_MS);
@@ -183,7 +188,7 @@ async function scrapeViaPlaywright(
       outboundLinks: ext.outboundLinks,
       primaryCtaHref: ext.primaryCtaHref,
       primaryCtaAnchor: ext.primaryCtaAnchor,
-      primaryCtaTarget: categoriseCtaTarget(redirectFinalDomain),
+      primaryCtaTarget: categoriseCtaTarget(redirectFinalDomain, brandDomain),
       redirectFinalUrl,
       redirectFinalDomain,
       redirectChain,

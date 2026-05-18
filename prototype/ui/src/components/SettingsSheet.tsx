@@ -10,12 +10,16 @@ import {
   SheetTrigger,
 } from "./ui/sheet";
 import { MonitoringControls } from "./MonitoringControls";
+import { KeywordManager } from "./KeywordManager";
+import type { Keyword } from "./KeywordSelector";
 
 interface Props {
   locale: string;
+  keywords: Keyword[];
+  onKeywordsChange: () => void;
 }
 
-export function SettingsSheet({ locale }: Props) {
+export function SettingsSheet({ locale, keywords, onKeywordsChange }: Props) {
   const { t } = useTranslation();
   return (
     <Sheet>
@@ -30,7 +34,8 @@ export function SettingsSheet({ locale }: Props) {
           <SheetTitle>{t("settings.title")}</SheetTitle>
           <SheetDescription>{t("settings.description")}</SheetDescription>
         </SheetHeader>
-        <div className="mt-2">
+        <div className="mt-2 space-y-4">
+          <KeywordManager keywords={keywords} onChange={onKeywordsChange} />
           <MonitoringControls locale={locale} />
         </div>
       </SheetContent>
