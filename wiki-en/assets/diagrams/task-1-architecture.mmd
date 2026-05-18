@@ -1,5 +1,5 @@
 ---
-title: Task 1 — SEO Automation Architecture
+title: Task 1 — Automated SEO site generation
 config:
   theme: dark
   themeVariables:
@@ -11,36 +11,84 @@ config:
     tertiaryColor: '#181b22'
     background: '#0f1115'
     fontFamily: 'Inter, -apple-system, sans-serif'
+    fontSize: '14px'
 ---
-flowchart LR
-    subgraph SOURCES["Task intake (concept)"]
-      direction TB
-      S1["Google Sheets<br/><i>OAuth 2.0 + 60s polling</i>"]
-      S2["Web Form UI<br/><i>HTTP form + REST</i>"]
-    end
-
-    I["Intake Service<br/><i>OAuth + polling worker</i>"]
-    Q[("Unified Task Queue<br/>state machine + idempotency")]
-    SIM["Status Tracker<br/>(queued → … → published)"]
-
-    subgraph PIPE["Pipeline (concept)"]
+flowchart TB
+    %% ───── Intake ─────
+    subgraph IN["① Task intake"]
       direction LR
-      P1["SERP Analysis<br/><i>SerpAPI / DataForSEO</i>"]
-      P2["Competitor Scraping<br/><i>Playwright + Readability</i>"]
-      P3["Topical Brief<br/><i>LLM clustering</i>"]
-      P4["AI Content<br/><i>Claude Sonnet via OpenRouter</i>"]
-      P5["HTML + SEO<br/><i>Astro + Schema.org</i>"]
-      P6["Deploy<br/><i>Cloudflare Pages API</i>"]
-      P1 --> P2 --> P3 --> P4 --> P5 --> P6
+      S1["Google Sheets<br/><i>polling, writeback</i>"]
+      S2["Web UI<br/><i>React dashboard</i>"]
     end
 
-    S1 -->|"polling"| I
-    S2 -->|"POST /api/tasks"| I
-    I --> Q
-    Q --> SIM
-    SIM -.->|"writeback when source='sheet'"| S1
-    SIM ---> PIPE
-    PIPE -->|"output URL"| SIM
+    Q[("Task queue<br/>PostgreSQL")]
 
-    style SOURCES fill:#1a2332,stroke:#4ea1ff,color:#e4e7ee
-    style PIPE fill:#2a1a2a,stroke:#b06bff,color:#e4e7ee,stroke-dasharray: 5 5
+    %% ───── Data gathering ─────
+    subgraph GATHER["② Input collection"]
+      direction LR
+      SERP["SERP top-10 + PAA<br/><b>DataForSEO</b><br/><i>$0.60 / 1k requests</i>"]
+      SCR["Competitor scrape<br/><b>Playwright Chromium</b><br/><i>+ Bright Data fallback</i><br/><i>for bot-protected sites</i>"]
+      SERP --> SCR
+    end
+
+    %% ───── AI generation ─────
+    subgraph GEN["③ AI generation (per-block)"]
+      direction TB
+      BRIEF["Page brief<br/><b>Claude Opus 4.7</b><br/><i>H1, H2 outline, FAQ,</i><br/><i>required entities</i>"]
+      BLOCKS["Body — block by block<br/><b>Sonnet 4.6 / Haiku 4.5</b><br/><i>via OpenRouter</i><br/><i>per-block for selective</i><br/><i>regeneration</i>"]
+      BRIEF --> BLOCKS
+    end
+
+    %% ───── Quality control ─────
+    subgraph QC["④ Quality control"]
+      direction LR
+      RULES["Programmatic rules<br/><i>density, length,</i><br/><i>schema.org validity,</i><br/><i>KSA: 18+, Cruks,</i><br/><i>celebrity bans</i>"]
+      JUDGE["LLM judge<br/><b>Sonnet 4.6</b><br/><i>tone, factuality,</i><br/><i>blandness, divergence</i><br/><i>from competitors</i>"]
+      RULES --> JUDGE
+    end
+
+    %% ───── Render + publish ─────
+    subgraph PUB["⑤ Render + publish"]
+      direction LR
+      ASTRO["HTML build<br/><b>Astro 5</b><br/><i>schema.org JSON-LD,</i><br/><i>OG tags, sitemap</i>"]
+      CF["Deploy<br/><b>Cloudflare Pages</b><br/><i>atomic rollout</i><br/><i>~10 s to CDN</i>"]
+      ASTRO --> CF
+    end
+
+    STATUS["⑥ Status writeback<br/>published / failed / under_review<br/><i>published URL</i>"]
+
+    %% ───── Storage (background) ─────
+    STORE[("Shared storage<br/>PostgreSQL — metadata,<br/>blocks, versions, log<br/><br/>Cloudflare R2 — raw<br/>competitor HTML,<br/>built HTML files")]
+
+    %% ───── Editorial loop ─────
+    EDITOR{{"Editor / auto-monitor<br/><i>selective regeneration</i><br/><i>or surgical edit of</i><br/><i>highlighted text</i>"}}
+
+    %% ───── Main flow ─────
+    S1 ==> Q
+    S2 ==> Q
+    Q ==> GATHER
+    GATHER ==> GEN
+    GEN ==> QC
+    QC -.->|"rejected<br/>→ regenerate"| GEN
+    QC ==> PUB
+    PUB ==> STATUS
+    STATUS -.->|"writeback"| IN
+
+    %% ───── Editorial feedback ─────
+    PUB --> EDITOR
+    EDITOR -.->|"one block<br/>or text slice"| GEN
+
+    %% ───── Storage refs ─────
+    GATHER -.- STORE
+    GEN -.- STORE
+    QC -.- STORE
+    PUB -.- STORE
+
+    %% ───── Styles ─────
+    style IN fill:#1a2332,stroke:#4ea1ff,color:#e4e7ee
+    style GATHER fill:#1f2a2a,stroke:#4dd2c7,color:#e4e7ee
+    style GEN fill:#2a1a2a,stroke:#b06bff,color:#e4e7ee
+    style QC fill:#332323,stroke:#ff8b3d,color:#e4e7ee
+    style PUB fill:#2a2a1a,stroke:#9ad97e,color:#e4e7ee
+    style STORE fill:#0f1922,stroke:#8b93a5,color:#a4adbf
+    style EDITOR fill:#221a33,stroke:#ffb84e,color:#e4e7ee
