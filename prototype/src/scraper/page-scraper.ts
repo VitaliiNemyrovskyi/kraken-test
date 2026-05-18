@@ -215,7 +215,10 @@ async function scrapeViaPlaywright(
       url: serpResult.url,
       pageDomain: ext.pageDomain,
       fetchedAt,
-      title: ext.title,
+      // Prefer SERP title — that's what Google indexed and what ranking is
+      // tied to. The scraped <title> can be a bot-challenge stub
+      // ("Just a moment...") which would silently break SERP-level signals.
+      title: serpResult.title || ext.title,
       metaDescription: ext.metaDescription,
       mainText: ext.mainText,
       outboundLinks: ext.outboundLinks,

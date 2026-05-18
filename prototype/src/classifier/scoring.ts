@@ -7,7 +7,11 @@ import type {
   RuleVerdict,
 } from "../types.js";
 
-const THRESHOLD = 40;
+// THRESHOLD lowered from 40 → 30 to surface tentative verdicts when only
+// SERP-level signals fire (e.g. lookalike domain, review-portal title) and
+// the page scrape returned no CTA/outbound data. Anything below threshold
+// still falls through to "unclear".
+const THRESHOLD = 30;
 const RULE_WEIGHT = 0.6;
 const LLM_WEIGHT = 0.4;
 
@@ -70,6 +74,30 @@ export function scoreSignals(signals: RuleSignals): RuleVerdict {
     scores.competitor_brand_thief += 35;
   }
 
+  // ───── SERP-level signals (work without scraped CTA/outbound data) ─────
+  // R11: page domain contains brand stem but isn't brand domain →
+  // typosquat / brand-cousin pattern. Default to affiliate (the common case
+  // economically); also bump thief so LLM can break the tie. Excluded for
+  // pages already classified as official or known competitor.
+  if (
+    signals.domainContainsBrandStem &&
+    !signals.isStarOfficial &&
+    !signals.pageDomainIsCompetitor
+  ) {
+    scores.affiliate += 45;
+    scores.competitor_brand_thief += 30;
+  }
+
+  // R12: title fits review-portal / listicle shape on a non-brand domain →
+  // affiliate prior (review portals monetise via affiliate commissions).
+  if (
+    signals.titleSuggestsReviewPortal &&
+    !signals.isStarOfficial &&
+    !signals.pageDomainIsCompetitor
+  ) {
+    scores.affiliate += 30;
+  }
+
   // ───── Unclear ─────
   // R10: brand mention without monetisation (informational: Wikipedia, news)
   if (
@@ -88,13 +116,16 @@ export function combineWithLlm(
   rule: RuleVerdict,
   llm: LlmVerdict | null,
 ): ClassificationResult {
-  // When LLM is disabled, rule scores act on their own (weight 1.0).
-  // When LLM is enabled, fuse 60/40.
-  const ruleW = llm ? RULE_WEIGHT : 1.0;
-  const llmW = llm ? LLM_WEIGHT : 0;
+  // LLM "unclear" is treated as abstention, not a vote against other
+  // categories — "I don't know" should not suppress a confident rule signal.
+  // In that case rule scores act on their own (weight 1.0). Otherwise the
+  // usual 60/40 fusion applies.
+  const llmAbstains = !llm || llm.category === "unclear";
+  const ruleW = llmAbstains ? 1.0 : RULE_WEIGHT;
+  const llmW = llmAbstains ? 0 : LLM_WEIGHT;
   const llmCategory = llm?.category ?? null;
   const llmContribution = (cat: Category): number =>
-    !llm || llmCategory !== cat ? 0 : llm.confidence * 100;
+    llmAbstains || llmCategory !== cat ? 0 : (llm as LlmVerdict).confidence * 100;
 
   const combined: RuleScores = {
     official: ruleW * rule.scores.official + llmW * llmContribution("official"),
@@ -127,7 +158,10 @@ export function combineWithLlm(
     `Rule scores: official=${rule.scores.official}, affiliate=${rule.scores.affiliate}, thief=${rule.scores.competitor_brand_thief}, unclear=${rule.scores.unclear}.`,
   );
   if (llm) {
-    explanationParts.push(`LLM: ${llm.category} (${llm.confidence.toFixed(2)}) — ${llm.explanation}`);
+    const tag = llmAbstains ? "abstained" : "voted";
+    explanationParts.push(
+      `LLM ${tag}: ${llm.category} (${llm.confidence.toFixed(2)}) - ${llm.explanation}`,
+    );
   } else {
     explanationParts.push("LLM: disabled.");
   }

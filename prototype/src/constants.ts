@@ -54,3 +54,10 @@ export const AFFILIATE_DISCLOSURE_RE =
 // (anchor mentions brand but href resolves to a competitor).
 export const BRAND_IN_ANCHOR_RE = /star\s*casino/i;
 
+// Review-portal / listicle SERP-title patterns (EN + NL). A non-brand domain
+// whose page title fits this shape is a strong affiliate prior even when we
+// have no scraped CTA — affiliates ARE the dominant economic model for casino
+// review sites.
+export const REVIEW_PORTAL_TITLE_RE =
+  /\b(reviews?|recensies?|ervaringen|alternatief|alternatieven|beste|vergelijk|top\s*\d+|vs\.?\s)\b/i;
+

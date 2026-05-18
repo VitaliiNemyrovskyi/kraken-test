@@ -3,8 +3,21 @@ import {
   AFFILIATE_UTM_RE,
   BRAND_IN_ANCHOR_RE,
   COMPETITOR_CASINO_DOMAINS,
+  REVIEW_PORTAL_TITLE_RE,
 } from "../constants.js";
 import type { OutboundLink, RuleSignals, ScrapedPage } from "../types.js";
+
+function brandStem(brandDomain: string): string {
+  return (brandDomain.split(".")[0] ?? brandDomain).toLowerCase();
+}
+
+// True iff the page's eTLD+1 contains the brand stem as substring but is not
+// the brand domain itself. Catches obvious lookalikes (starcasino-nl.com,
+// starcasinonederland.com) and brand cousins (starcasino.be).
+function containsBrandStem(pageDomain: string, brandDomain: string): boolean {
+  if (pageDomain === brandDomain) return false;
+  return pageDomain.toLowerCase().includes(brandStem(brandDomain));
+}
 
 function hasAffiliateParam(href: string): boolean {
   return AFFILIATE_PARAM_RE.test(href) || AFFILIATE_UTM_RE.test(href);
@@ -72,5 +85,7 @@ export function extractSignals(
     ctaAnchorHrefMismatch,
     hasAffiliateDisclosure: page.hasAffiliateDisclosure,
     redirectHops: page.redirectChain?.hops ?? 0,
+    domainContainsBrandStem: containsBrandStem(page.pageDomain, brandDomain),
+    titleSuggestsReviewPortal: REVIEW_PORTAL_TITLE_RE.test(page.title),
   };
 }

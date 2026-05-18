@@ -74,6 +74,10 @@ export interface RuleSignals {
   ctaAnchorHrefMismatch: boolean;
   hasAffiliateDisclosure: boolean;
   redirectHops: number;
+  // SERP-level signals that survive even when the page scrape produces no
+  // CTA / outbound data (Cloudflare bot challenges, JS-injected affiliate links).
+  domainContainsBrandStem: boolean;
+  titleSuggestsReviewPortal: boolean;
 }
 
 export interface RuleVerdict {
