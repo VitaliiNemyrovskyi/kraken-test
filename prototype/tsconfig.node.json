@@ -18,5 +18,5 @@
     "isolatedModules": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "data", "ui"]
+  "exclude": ["node_modules", "dist", "data"]
 }

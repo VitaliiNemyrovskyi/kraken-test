@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* shadcn dark theme tokens (HSL components) */
+    --background: 222 22% 8%;
+    --foreground: 213 18% 90%;
+    --card: 222 18% 11%;
+    --card-foreground: 213 18% 90%;
+    --primary: 213 100% 65%;
+    --primary-foreground: 222 22% 8%;
+    --secondary: 222 16% 14%;
+    --secondary-foreground: 213 18% 90%;
+    --muted: 222 16% 14%;
+    --muted-foreground: 217 11% 65%;
+    --accent: 222 16% 14%;
+    --accent-foreground: 213 18% 90%;
+    --border: 222 14% 18%;
+    --input: 222 14% 18%;
+    --ring: 213 100% 65%;
+    --radius: 0.5rem;
+
+    /* Category accents */
+    --official: 146 60% 55%;
+    --affiliate: 213 100% 65%;
+    --thief: 0 84% 65%;
+    --unclear: 217 11% 65%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+}

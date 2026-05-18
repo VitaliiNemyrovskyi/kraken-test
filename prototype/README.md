@@ -19,9 +19,11 @@
 | Language | TypeScript 5+ strict |
 | SERP | SerpAPI free tier (100/міс), Playwright fallback, mock fixture |
 | Scraper | Playwright Chromium + cheerio + redirect chain resolution (HEAD-follow до 5 hops) |
-| Classifier | Rules (8 signals) + LLM via OpenRouter (default `anthropic/claude-opus-4-7`) + weighted scoring |
+| Classifier | 11 rule signals + LLM via OpenRouter (`anthropic/claude-opus-4-7`) + weighted scoring |
 | Storage | SQLite (`better-sqlite3`) — snapshots, classifications, domain_history |
-| Dashboard | Fastify + Chart.js inline (без build step) |
+| Backend | Fastify (JSON API + static React build) |
+| **Frontend** | **React 18 + Vite 5 + Tailwind CSS 3 + shadcn/ui-style components + Recharts** |
+| Icons | lucide-react |
 | Validation | `zod` runtime contracts |
 
 ---
@@ -32,7 +34,7 @@
 
 ```bash
 cd prototype
-npm install
+npm install                        # ~380 packages (Node + React + Vite)
 npx playwright install chromium    # ~120MB, тільки якщо плануєте scraping
 ```
 
@@ -51,14 +53,22 @@ cp .env.example .env
 
 **Offline demo (без API ключів):**
 ```bash
-npm run analyze:mock        # обробляє data/mock-serp.json
-npm run dashboard           # http://localhost:3000
+npm run analyze:mock        # обробляє data/mock-serp.json (12 entries)
+npm run dashboard           # vite build → Fastify serves on http://localhost:3000
 ```
 
 **Реальний run (з ключами):**
 ```bash
 npm run analyze             # SerpAPI → Playwright scrape → OpenRouter classify
 npm run dashboard
+```
+
+**Dev mode (Vite HMR + Fastify):**
+```bash
+# Terminal 1 — backend
+npx tsx src/dashboard/server.ts
+# Terminal 2 — Vite dev server with HMR + /api proxy
+npm run dashboard:dev       # http://localhost:5173
 ```
 
 ---
@@ -142,40 +152,41 @@ final = argmax(combined); if (final < 40) → "unclear"
 
 ```
 prototype/
-├── package.json, tsconfig.json, .env.example
+├── package.json
+├── tsconfig.json / tsconfig.node.json / tsconfig.ui.json   # split: backend vs UI
+├── vite.config.ts, tailwind.config.js, postcss.config.js
+├── .env.example
 ├── data/
-│   ├── mock-serp.json          # offline fixture (10 plausible domains)
+│   ├── mock-serp.json          # offline fixture (12 entries — all 6 patterns)
 │   └── starcasino.db           # SQLite (gitignored)
-└── src/
-    ├── config.ts               # env loader (zod)
-    ├── types.ts                # Category, ScrapedPage, RuleSignals, ClassificationResult
-    ├── constants.ts            # COMPETITOR_CASINO_DOMAINS, AFFILIATE_PARAM_RE, CTA_SELECTORS
-    ├── serp/
-    │   ├── index.ts            # provider factory by SERP_SOURCE
-    │   ├── serpapi-provider.ts # SerpAPI client (free tier)
-    │   ├── playwright-provider.ts  # direct Google scrape (fallback)
-    │   └── mock-provider.ts    # data/mock-serp.json
-    ├── scraper/
-    │   ├── page-scraper.ts     # Playwright + cheerio + redirect resolution
-    │   ├── extractors.ts       # HTML → outbound links + CTA detection
-    │   └── rate-limiter.ts     # token bucket per domain (1 req/sec)
-    ├── classifier/
-    │   ├── index.ts            # orchestrator
-    │   ├── rules.ts            # extractSignals (8 signals)
-    │   ├── scoring.ts          # decision matrix + combineWithLlm
-    │   ├── llm.ts              # OpenRouter call, zod-validated JSON
-    │   └── prompts.ts          # system + user prompt for LLM
-    ├── storage/
-    │   ├── schema.sql          # 5 tables (keywords, snapshots, results, classifications, domain_history)
-    │   └── db.ts               # saveSnapshot, getLatestSnapshot, getCategorySummary
-    ├── analyze/
-    │   └── run.ts              # CLI: SERP → scrape → classify → store
-    └── dashboard/
-        ├── server.ts           # Fastify + JSON endpoints
-        └── public/
-            ├── index.html      # dashboard
-            ├── app.js          # fetch + Chart.js
-            └── styles.css      # dark theme
+├── src/                         # ── Backend (Node.js) ──
+│   ├── config.ts, types.ts, constants.ts
+│   ├── serp/
+│   │   ├── index.ts, serpapi-provider.ts, playwright-provider.ts, mock-provider.ts
+│   ├── scraper/
+│   │   ├── page-scraper.ts, extractors.ts, rate-limiter.ts
+│   ├── classifier/
+│   │   ├── index.ts, rules.ts, scoring.ts, llm.ts, prompts.ts
+│   ├── storage/
+│   │   ├── schema.sql, db.ts
+│   ├── analyze/
+│   │   └── run.ts              # CLI: SERP → scrape → classify → store
+│   └── dashboard/
+│       ├── server.ts           # Fastify + JSON endpoints + serves built React
+│       └── public/             # ← Vite build output (gitignored)
+└── ui/                          # ── Frontend (React + Vite) ──
+    ├── index.html              # Vite entry
+    └── src/
+        ├── main.tsx, App.tsx
+        ├── globals.css         # Tailwind directives + shadcn theme tokens (HSL)
+        ├── types.ts            # frontend types matching API
+        ├── lib/utils.ts        # cn() + category color helpers
+        └── components/
+            ├── CategoryPie.tsx       # recharts doughnut
+            ├── SummaryCards.tsx      # 4 metric cards
+            ├── DomainsTable.tsx      # expandable rows with explanation
+            └── ui/                   # shadcn-style primitives
+                ├── card.tsx, badge.tsx, table.tsx
 ```
 
 ---
@@ -188,6 +199,7 @@ prototype/
 - **SQLite, не Postgres:** прототип single-process. Production: Postgres + read replicas, схема та сама.
 - **Mock fixture обов'язкова:** demo має працювати без API ключів. Реальний run опціональний.
 - **Karpathy-coder principles** застосовані: simplicity first, surgical changes, defined success criteria (рівні confidence для кожної категорії).
+- **React + Vite + shadcn** для UI: industry-standard в iGaming/SaaS; компонентна архітектура для розширення (drill-down, filters, time-series). Recharts замість Chart.js — більш React-idiomatic.
 
 Детальніше у wiki: [[../wiki/concepts/]] та [[../wiki/synthesis/task-2-answer]].
 

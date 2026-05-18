@@ -1,34 +1,52 @@
 {
   "name": "kraken-starcasino-monitor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Task 2 prototype: branded SERP monitor for StarCasino (NL). Fetches top-10 Google SERP, classifies domains into official/affiliate/competitor_brand_thief/unclear, persists snapshots to SQLite, serves a dashboard.",
+  "description": "Task 2 prototype: branded SERP monitor for StarCasino (NL). React + Vite + shadcn dashboard backed by Fastify + Playwright + SQLite + OpenRouter classifier.",
   "type": "module",
   "scripts": {
     "analyze": "tsx src/analyze/run.ts",
     "analyze:mock": "SERP_SOURCE=mock SERP_LIMIT=12 CLASSIFIER_LLM_ENABLED=false tsx src/analyze/run.ts",
-    "dashboard": "tsx src/dashboard/server.ts",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "dashboard:dev": "vite",
+    "dashboard:build": "vite build",
+    "dashboard": "vite build && tsx src/dashboard/server.ts",
+    "build": "tsc -p tsconfig.node.json && vite build",
+    "typecheck": "tsc -p tsconfig.node.json --noEmit && tsc -p tsconfig.ui.json --noEmit"
   },
   "dependencies": {
     "@fastify/static": "^7.0.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "better-sqlite3": "^11.3.0",
     "cheerio": "^1.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.0",
     "fastify": "^4.28.0",
+    "lucide-react": "^0.451.0",
     "nanoid": "^5.0.7",
     "openai": "^4.67.0",
     "playwright": "^1.48.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.13.0",
     "serpapi": "^2.1.0",
+    "tailwind-merge": "^2.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^20.14.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
   },
   "engines": {
     "node": ">=20.0.0"
