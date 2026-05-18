@@ -36,6 +36,11 @@ export async function closeBrowser(): Promise<void> {
   }
 }
 
+// Realistic Chrome UA — the "Monitor/0.1" suffix the prototype used originally
+// got us flagged as a bot by every Cloudflare/DataDome-protected casino site.
+const REAL_BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
 async function resolveRedirectChain(
   startUrl: string,
 ): Promise<{
@@ -57,8 +62,10 @@ async function resolveRedirectChain(
         method: "GET",
         redirect: "manual",
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 KrakenLeads-Monitor/0.1",
+          "User-Agent": REAL_BROWSER_UA,
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "nl,en-US;q=0.9,en;q=0.8",
         },
         signal: AbortSignal.timeout(10000),
       });
@@ -155,18 +162,44 @@ async function scrapeViaPlaywright(
   try {
     const browser = await getBrowser();
     const context = await browser.newContext({
-      userAgent:
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 KrakenLeads-Monitor/0.1",
+      userAgent: REAL_BROWSER_UA,
+      locale: "nl-NL",
+      viewport: { width: 1366, height: 768 },
+      extraHTTPHeaders: {
+        "Accept-Language": "nl,en-US;q=0.9,en;q=0.8",
+      },
     });
     const page = await context.newPage();
-    await page.goto(serpResult.url, {
-      waitUntil: "domcontentloaded",
-      timeout: config.SCRAPER_TIMEOUT_MS,
-    });
+    let response;
+    try {
+      response = await page.goto(serpResult.url, {
+        waitUntil: "load",
+        timeout: config.SCRAPER_TIMEOUT_MS,
+      });
+    } catch (e) {
+      // load timeout — try whatever HTML is on the page so far rather than
+      // bailing with no data.
+      console.warn(
+        `[scraper] ${serpResult.domain} goto timed out (${(e as Error).message}) — using partial DOM`,
+      );
+    }
+    // Casino landing pages lazy-load CTAs after first paint. A short post-load
+    // settle gives those scripts time to inject the affiliate links.
+    await page.waitForTimeout(1500);
     const html = await page.content();
+    const status = response?.status();
     await context.close();
 
+    if (status && status >= 400) {
+      console.warn(`[scraper] ${serpResult.domain} returned HTTP ${status}`);
+    }
+
     const ext = extractFromHtml(html, serpResult.url);
+    if (!ext.mainText) {
+      console.warn(
+        `[scraper] ${serpResult.domain} produced empty mainText (html len=${html.length}, status=${status})`,
+      );
+    }
 
     let redirectFinalUrl: string | null = null;
     let redirectFinalDomain: string | null = null;
