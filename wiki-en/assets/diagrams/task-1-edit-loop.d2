@@ -1,0 +1,165 @@
+# Task 1 — Editorial loop (selective regeneration)
+# Render: d2 --theme 200 --layout elk --pad 40 task-1-edit-loop.d2 task-1-edit-loop.svg
+
+direction: down
+
+published: {
+  label: |md
+    ### Published page
+
+    Cloudflare Pages · live URL
+  |
+  style: {
+    fill: "#2a2a1a"
+    stroke: "#9ad97e"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+trigger: {
+  shape: hexagon
+  label: |md
+    ### Trigger
+
+    Editor spots an issue
+    **or**
+    Auto-monitor detects ranking drop
+  |
+  style: {
+    fill: "#221a33"
+    stroke: "#ffb84e"
+    stroke-width: 3
+    font-color: "#e4e7ee"
+  }
+}
+
+option_a: {
+  label: |md
+    ### Option A
+    **Selective regeneration**
+
+    Editor clicks "Regenerate"
+    next to a specific block
+    (e.g. the FAQ)
+  |
+  style: {
+    fill: "#2a1a2a"
+    stroke: "#b06bff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+option_b: {
+  label: |md
+    ### Option B
+    **Surgical text edit**
+
+    Editor highlights an arbitrary
+    text fragment and asks
+    for that part to be rewritten
+  |
+  style: {
+    fill: "#2a1a2a"
+    stroke: "#b06bff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+regen: {
+  label: |md
+    ### AI generates a new version
+
+    Sonnet 4.6 / Haiku 4.5 via OpenRouter
+
+    Uses original brief
+    + editor's comment
+    + surrounding-blocks context
+  |
+  style: {
+    fill: "#2a1a2a"
+    stroke: "#b06bff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+preview: {
+  label: |md
+    ### Diff preview
+
+    Side-by-side comparison
+    old ↔ new
+  |
+  style: {
+    fill: "#332323"
+    stroke: "#ff8b3d"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+decision: {
+  shape: diamond
+  label: |md
+    Accept?
+  |
+  style: {
+    fill: "#1f2a2a"
+    stroke: "#4dd2c7"
+    stroke-width: 3
+    font-color: "#e4e7ee"
+  }
+}
+
+rebuild: {
+  label: |md
+    ### Rebuild + deploy
+
+    Astro rebuilds the page
+    with the new block
+    Cloudflare Pages picks it up
+    in ~10 seconds
+  |
+  style: {
+    fill: "#2a2a1a"
+    stroke: "#9ad97e"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+rollback: {
+  label: |md
+    ### Old block stays
+
+    New version is stored
+    flagged as rejected
+    in the audit log
+  |
+  style: {
+    fill: "#1a2332"
+    stroke: "#8b93a5"
+    stroke-width: 2
+    border-radius: 12
+    font-color: "#cdd2db"
+  }
+}
+
+published -> trigger
+trigger -> option_a
+trigger -> option_b
+option_a -> regen
+option_b -> regen
+regen -> preview
+preview -> decision
+decision -> rebuild: "yes"
+decision -> rollback: "no"

@@ -1,0 +1,177 @@
+# Task 1 — Архітектура автоматизації SEO (основний пайплайн)
+# Render: d2 --theme 200 --layout elk --pad 40 task-1-architecture.d2 task-1-architecture.svg
+
+direction: down
+
+# ───────────────────────────────────────────────
+# Основний пайплайн — лінійний потік без зворотних звʼязків
+# Редакторська петля винесена в окрему діаграму
+# ───────────────────────────────────────────────
+
+intake: {
+  label: |md
+    ### ①  Прийом задач
+
+    Google Sheets · Web UI
+  |
+  style: {
+    fill: "#1a2332"
+    stroke: "#4ea1ff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+queue: {
+  shape: cylinder
+  label: |md
+    **Черга задач**
+
+    PostgreSQL
+  |
+  style: {
+    fill: "#0f1922"
+    stroke: "#8b93a5"
+    stroke-width: 2
+    font-color: "#cdd2db"
+  }
+}
+
+serp: {
+  label: |md
+    ### ②  SERP-фетч
+
+    **DataForSEO** · $0.60 / 1k
+  |
+  style: {
+    fill: "#1f2a2a"
+    stroke: "#4dd2c7"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+scrape: {
+  label: |md
+    ### ③  Скрейп конкурентів
+
+    **Playwright** + Bright Data
+  |
+  style: {
+    fill: "#1f2a2a"
+    stroke: "#4dd2c7"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+brief: {
+  label: |md
+    ### ④  Бриф сторінки
+
+    **Claude Opus 4.7**
+    через OpenRouter
+  |
+  style: {
+    fill: "#2a1a2a"
+    stroke: "#b06bff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+blocks: {
+  label: |md
+    ### ⑤  Тіло — блоки
+
+    **Sonnet 4.6 / Haiku 4.5**
+    per-block, через OpenRouter
+  |
+  style: {
+    fill: "#2a1a2a"
+    stroke: "#b06bff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+qc: {
+  label: |md
+    ### ⑥  Контроль якості
+
+    Правила + LLM-judge
+    KSA compliance
+  |
+  style: {
+    fill: "#332323"
+    stroke: "#ff8b3d"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+build: {
+  label: |md
+    ### ⑦  Збірка HTML
+
+    **Astro 5** + schema.org
+  |
+  style: {
+    fill: "#2a2a1a"
+    stroke: "#9ad97e"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+deploy: {
+  label: |md
+    ### ⑧  Деплой
+
+    **Cloudflare Pages**
+    ~10 с до CDN
+  |
+  style: {
+    fill: "#2a2a1a"
+    stroke: "#9ad97e"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+status: {
+  label: |md
+    ### ⑨  Статус назад
+
+    writeback у Sheets / UI
+  |
+  style: {
+    fill: "#1a2332"
+    stroke: "#4ea1ff"
+    stroke-width: 3
+    border-radius: 12
+    font-color: "#e4e7ee"
+  }
+}
+
+# ───────────────────────────────────────────────
+# Звʼязки — лінійний потік, всі стрілки в одну сторону
+# ───────────────────────────────────────────────
+
+intake -> queue
+queue -> serp
+serp -> scrape
+scrape -> brief
+brief -> blocks
+blocks -> qc
+qc -> build
+build -> deploy
+deploy -> status
