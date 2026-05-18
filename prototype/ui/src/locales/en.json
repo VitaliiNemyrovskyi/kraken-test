@@ -22,6 +22,31 @@
     "hint": "Each datapoint is one monitoring run. Counts per category over time.",
     "empty": "No history yet — run `npm run monitor` to start collecting snapshots."
   },
+  "monitor": {
+    "title": "Monitoring scheduler",
+    "hint": "Trigger a one-off run or set a recurring interval.",
+    "active": "Active",
+    "stopped": "Stopped",
+    "schedule": "Schedule",
+    "lastRun": "Last run",
+    "duration": "Duration",
+    "busy": "State",
+    "running": "Running…",
+    "idle": "Idle",
+    "lastError": "Last error",
+    "runNow": "Run Now",
+    "stop": "Stop",
+    "intervalLabel": "Interval preset"
+  },
+  "interval": {
+    "30s": "30 sec",
+    "1m": "1 min",
+    "5m": "5 min",
+    "15m": "15 min",
+    "1h": "1 hour",
+    "6h": "6 hours",
+    "daily": "Daily"
+  },
   "table": {
     "title": "Top-{{count}} domains",
     "hint": "Click any row to see the classifier's reasoning.",

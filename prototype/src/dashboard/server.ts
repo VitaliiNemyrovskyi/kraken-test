@@ -3,6 +3,7 @@ import fastifyStatic from "@fastify/static";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { config } from "../config.js";
+import { scheduler } from "../scheduler.js";
 import {
   getCategorySummary,
   getDomainsByCategory,
@@ -68,6 +69,30 @@ export async function createApp(): Promise<FastifyInstance> {
     } = req.query as { query?: string; geo?: string; limit?: string };
     const points = getHistory(query, geo, Number.parseInt(limit, 10) || 30);
     return { points };
+  });
+
+  // ───── Scheduler control ─────
+  app.get("/api/monitor/status", async () => scheduler.status());
+
+  app.post("/api/monitor/start", async (req, reply) => {
+    const body = (req.body ?? {}) as { cron?: string };
+    if (!body.cron) {
+      return reply.code(400).send({ ok: false, error: "missing_cron" });
+    }
+    const result = scheduler.start(body.cron);
+    if (!result.ok) return reply.code(400).send({ ok: false, error: result.error });
+    return { ok: true, status: scheduler.status() };
+  });
+
+  app.post("/api/monitor/stop", async () => {
+    scheduler.stop();
+    return { ok: true, status: scheduler.status() };
+  });
+
+  app.post("/api/monitor/trigger", async () => {
+    // Run async — return immediately so UI doesn't time out on a slow analyze.
+    void scheduler.tick("manual");
+    return { ok: true, status: scheduler.status() };
   });
 
   return app;

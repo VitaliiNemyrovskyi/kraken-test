@@ -6,6 +6,7 @@ import { SummaryCards } from "./components/SummaryCards";
 import { DomainsTable } from "./components/DomainsTable";
 import { HistoryChart } from "./components/HistoryChart";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
+import { MonitoringControls } from "./components/MonitoringControls";
 import type { HistoryResponse, Summary, SnapshotResponse } from "./types";
 
 async function fetchJSON<T>(url: string): Promise<T> {
@@ -86,8 +87,12 @@ export function App() {
         <LanguageSwitcher />
       </header>
 
-      <section className="mb-8">
+      <section className="mb-6">
         <SummaryCards counts={summary.counts} percentages={summary.percentages} />
+      </section>
+
+      <section className="mb-6">
+        <MonitoringControls locale={locale} />
       </section>
 
       <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">

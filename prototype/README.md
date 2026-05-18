@@ -69,9 +69,15 @@ npm run dashboard
 npm run monitor             # default: every 6 hours, real SerpAPI
 npm run monitor:demo        # demo: every 30 sec, mock fixture (no API keys)
 ```
-Кожен tick запускає `analyze` → новий рядок у `snapshots`. Dashboard показує **time-series chart** (last 30 snapshots), auto-refresh кожні 10 сек. Конфіг:
+Кожен tick запускає `analyze` → новий рядок у `snapshots`. Dashboard показує **time-series chart** (last 30 snapshots) + **інтерактивні monitoring controls**, auto-refresh кожні 3-10 сек. Конфіг env:
 - `MONITOR_CRON` — cron expression (5 або 6 fields). Default `"0 */6 * * *"`.
 - `RUN_ON_START=false` — пропустити initial tick. Default запускає одразу.
+
+**Інтерактивне керування з UI** (працює і в `dashboard`, і в `monitor` режимі):
+- **Run Now** — натиснути кнопку → миттєвий one-off `analyze` (без чекання cron)
+- **Interval pills** — клік на `30 сек / 1 хв / 5 хв / 15 хв / 1 год / 6 год / Щодня` → стартує scheduler з відповідним cron
+- **Stop** — зупинити scheduler (попередні snapshots залишаються)
+- Status показує: active/stopped, current cron, last run timestamp, duration, busy state, last error
 
 **Dev mode (Vite HMR + Fastify):**
 ```bash
@@ -122,6 +128,10 @@ Dashboard на `http://localhost:3000` показує:
 | GET | `/api/latest?query=&geo=` | Останній snapshot з усіма result + classification |
 | GET | `/api/history?query=&geo=&limit=30` | Time-series — last N snapshots, counts per category |
 | GET | `/api/domains/:category?query=&geo=` | Domain list per category |
+| GET | `/api/monitor/status` | Scheduler status: active, cron, lastRunAt, duration, busy, lastError |
+| POST | `/api/monitor/start` | `{ cron: "*/5 * * * *" }` → start/replace scheduler |
+| POST | `/api/monitor/stop` | Stop scheduler (preserves history) |
+| POST | `/api/monitor/trigger` | One-off immediate analyze tick (non-blocking) |
 
 ---
 
