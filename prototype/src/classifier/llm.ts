@@ -42,7 +42,8 @@ export async function classifyWithLlm(
         Authorization: `Bearer ${config.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://github.com/kraken-leads/test-task",
-        "X-Title": "Kraken Leads — StarCasino Monitor",
+        // HTTP headers must be Latin-1 (ByteString) — no em dash here.
+        "X-Title": "Kraken Leads - StarCasino Monitor",
       },
       body: JSON.stringify(body),
       signal: controller.signal,
