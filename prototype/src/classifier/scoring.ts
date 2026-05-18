@@ -18,56 +18,67 @@ export function scoreSignals(signals: RuleSignals): RuleVerdict {
     competitor_brand_thief: 0,
     unclear: 0,
   };
-  const reasons: string[] = [];
 
-  // Official — domain match wins decisively
-  if (signals.isStarOfficial) {
-    scores.official += 100;
-    reasons.push("page_domain_is_brand");
-  }
+  // ───── Official ─────
+  // R1: page IS the brand domain → decisive
+  if (signals.isStarOfficial) scores.official += 100;
 
-  // Affiliate signals
-  if (signals.starLinkRatio >= 0.5 && signals.hasAffParamsToStar) {
-    scores.affiliate += 60;
-    reasons.push("brand_link_ratio_high_with_aff_params");
-  }
-  if (signals.primaryCtaTarget === "star" && signals.redirectsToStar) {
-    scores.affiliate += 50;
-    reasons.push("cta_resolves_to_brand");
-  }
+  // ───── Competitor brand thief — high-priority (detect first) ─────
+  // R2: page IS itself a known competitor casino → direct SEO theft of brand slot
+  if (signals.pageDomainIsCompetitor) scores.competitor_brand_thief += 90;
 
-  // Competitor brand thief signals
+  // R3: anchor text says brand, href resolves to competitor → cloaking
+  if (signals.ctaAnchorHrefMismatch) scores.competitor_brand_thief += 60;
+
+  // R4: outbound link mix dominated by competitor casinos with aff params
   if (signals.compLinkRatio >= 0.4 && signals.hasAffParamsToComp) {
     scores.competitor_brand_thief += 70;
-    reasons.push("competitor_link_ratio_high_with_aff_params");
   }
+
+  // R5: CTA target is competitor + brand visible in main text (deliberate SERP-stuffing)
   if (
     signals.primaryCtaTarget === "competitor" &&
     signals.brandMentionsInText >= 3
   ) {
     scores.competitor_brand_thief += 60;
-    reasons.push("cta_to_competitor_with_brand_mentions");
-  }
-  if (signals.redirectsToComp) {
-    scores.competitor_brand_thief += 30;
-    reasons.push("redirect_resolves_to_competitor");
   }
 
-  // Dual-promote tiebreak — competitor leans win (ADR-008)
+  // R6: redirect chain ends at competitor casino domain
+  if (signals.redirectsToComp) scores.competitor_brand_thief += 30;
+
+  // ───── Affiliate ─────
+  // R7: most outbound links go to brand and at least one is tagged with aff param
+  if (signals.starLinkRatio >= 0.5 && signals.hasAffParamsToStar) {
+    scores.affiliate += 60;
+  }
+
+  // R8: primary CTA after redirect resolution lands on brand domain
+  if (signals.primaryCtaTarget === "star" && signals.redirectsToStar) {
+    scores.affiliate += 50;
+  }
+
+  // R9: visible affiliate disclosure (per EU consumer directive / FTC)
+  // Positive signal for legitimate affiliate — never enough alone, but
+  // confidence-builder for affiliate verdict.
+  if (signals.hasAffiliateDisclosure && (signals.starLinkRatio > 0 || signals.redirectsToStar)) {
+    scores.affiliate += 15;
+  }
+
+  // ───── Dual-promote tiebreak (ADR-008) — competitor leans win ─────
   if (signals.hasAffParamsToStar && signals.hasAffParamsToComp) {
     scores.affiliate += 25;
     scores.competitor_brand_thief += 35;
-    reasons.push("dual_promote_thief_leans_win");
   }
 
-  // Unclear — brand mention without monetisation
+  // ───── Unclear ─────
+  // R10: brand mention without monetisation (informational: Wikipedia, news)
   if (
     signals.brandMentionsInText >= 1 &&
     signals.outboundCasinoLinks === 0 &&
-    !signals.isStarOfficial
+    !signals.isStarOfficial &&
+    !signals.pageDomainIsCompetitor
   ) {
     scores.unclear += 30;
-    reasons.push("brand_mention_no_monetisation");
   }
 
   return { scores, signals };

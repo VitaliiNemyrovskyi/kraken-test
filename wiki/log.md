@@ -37,3 +37,7 @@ Detailed answer to PDF Task 1 question 'how to scale to 1000+ sites/month' — 8
 ## [2026-05-18] delete | remove intake/ (out of PDF scope)
 
 Task 1 is theoretical-only per PDF brief. intake/ Node.js prototype removed via git rm. Wiki concepts (google-sheets-intake, web-ui-intake, task-queue) rewritten as concept-only design (UA+EN). Task 1 architecture diagram regenerated. README and architecture-overview updated. prototype/ folder remains for upcoming Task 2 implementation.
+
+## [2026-05-18] update | classifier: 4 new signals + 6 worked LLM examples + comparisons page
+
+Added pageDomainIsCompetitor (+90 thief), ctaAnchorHrefMismatch (+60 thief, cloaking detect), hasAffiliateDisclosure (+15 aff legitimacy), redirect chain hops capture. LLM prompt rewritten with 6 few-shot examples covering every category and pattern. New mock fixture entries: tonybet.nl (direct-competitor-on-brand) and shadyreview.nl (cloaked anchor). Smoke test: 1 official / 5 affiliate / 5 thief / 1 unclear across 12 fixture entries. Created wiki/comparisons/affiliate-vs-brand-thief-signals.md (UA+EN) — THE document answering PDF question about distinguishing affiliate from competitor brand thief.

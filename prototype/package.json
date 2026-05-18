@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "analyze": "tsx src/analyze/run.ts",
-    "analyze:mock": "SERP_SOURCE=mock CLASSIFIER_LLM_ENABLED=false tsx src/analyze/run.ts",
+    "analyze:mock": "SERP_SOURCE=mock SERP_LIMIT=12 CLASSIFIER_LLM_ENABLED=false tsx src/analyze/run.ts",
     "dashboard": "tsx src/dashboard/server.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit"

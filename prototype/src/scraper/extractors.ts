@@ -52,6 +52,7 @@ export function extractFromHtml(html: string, pageUrl: string) {
 
   // Primary CTA — first matching selector, else fall back to first external link in main content
   let primaryCtaHref: string | null = null;
+  let primaryCtaAnchor: string | null = null;
   for (const sel of CTA_SELECTORS) {
     const el = $(sel).first();
     if (el.length) {
@@ -59,6 +60,7 @@ export function extractFromHtml(html: string, pageUrl: string) {
       if (href) {
         try {
           primaryCtaHref = new URL(href, pageUrl).href;
+          primaryCtaAnchor = el.text().trim().slice(0, 200);
           break;
         } catch {
           // fallthrough
@@ -68,7 +70,10 @@ export function extractFromHtml(html: string, pageUrl: string) {
   }
   if (!primaryCtaHref) {
     const firstExternal = outboundLinks.find((l) => l.isExternal);
-    primaryCtaHref = firstExternal?.href ?? null;
+    if (firstExternal) {
+      primaryCtaHref = firstExternal.href;
+      primaryCtaAnchor = firstExternal.anchor;
+    }
   }
 
   return {
@@ -78,5 +83,6 @@ export function extractFromHtml(html: string, pageUrl: string) {
     mainText,
     outboundLinks,
     primaryCtaHref,
+    primaryCtaAnchor,
   };
 }

@@ -72,6 +72,20 @@
       "domain": "gambling.com",
       "title": "StarCasino Nederland — review and bonus details",
       "snippet": "StarCasino review from Gambling.com. Licensed by KSA. Bonus, games, payment methods reviewed."
+    },
+    {
+      "position": 11,
+      "url": "https://www.tonybet.nl/",
+      "domain": "tonybet.nl",
+      "title": "TonyBet — beste online casino Nederland (KSA)",
+      "snippet": "TonyBet is een KSA-licensed online casino. Speel slots, blackjack, roulette. Beter alternatief voor StarCasino."
+    },
+    {
+      "position": 12,
+      "url": "https://shadyreview.nl/star-casino-2026",
+      "domain": "shadyreview.nl",
+      "title": "StarCasino ervaringen 2026 - eerlijke review",
+      "snippet": "Onze StarCasino review. Klik hieronder om te spelen bij StarCasino met onze exclusieve bonus."
     }
   ],
   "_scraped": {
@@ -91,15 +105,18 @@
     "casino.nl": {
       "title": "StarCasino review 2026",
       "metaDescription": "Onze uitgebreide review van StarCasino met exclusieve partnerlink.",
-      "mainText": "StarCasino is een legitiem Nederlands casino. Speel via onze partnerlink en krijg €100 welkomstbonus.",
+      "mainText": "StarCasino is een legitiem Nederlands casino. Disclosure: dit is een affiliate review — we earn commission als u via onze partnerlink speelt. Speel via onze partnerlink en krijg €100 welkomstbonus.",
       "outboundLinks": [
         { "href": "https://www.starcasino.nl/?btag=cas-nl-12345", "anchor": "Speel bij StarCasino", "isExternal": true, "domain": "starcasino.nl" },
         { "href": "https://www.starcasino.nl/bonussen?aff_id=cas-nl", "anchor": "Bonussen bekijken", "isExternal": true, "domain": "starcasino.nl" }
       ],
       "primaryCtaHref": "https://www.starcasino.nl/?btag=cas-nl-12345",
+      "primaryCtaAnchor": "Speel bij StarCasino",
       "primaryCtaTarget": "star",
       "redirectFinalUrl": "https://www.starcasino.nl/?btag=cas-nl-12345",
-      "redirectFinalDomain": "starcasino.nl"
+      "redirectFinalDomain": "starcasino.nl",
+      "redirectChain": { "hops": 0, "intermediateDomains": ["starcasino.nl"] },
+      "hasAffiliateDisclosure": true
     },
     "onlinecasinoground.nl": {
       "title": "StarCasino 2026 — Recensie & Bonuscode",
@@ -203,9 +220,44 @@
         { "href": "https://www.hollandcasino.nl/", "anchor": "Holland Casino review", "isExternal": true, "domain": "hollandcasino.nl" }
       ],
       "primaryCtaHref": "https://www.starcasino.nl/",
+      "primaryCtaAnchor": "Visit StarCasino",
       "primaryCtaTarget": "star",
       "redirectFinalUrl": "https://www.starcasino.nl/",
-      "redirectFinalDomain": "starcasino.nl"
+      "redirectFinalDomain": "starcasino.nl",
+      "redirectChain": { "hops": 0, "intermediateDomains": ["starcasino.nl"] },
+      "hasAffiliateDisclosure": false
+    },
+    "tonybet.nl": {
+      "_comment": "Edge case: competitor casino's own site ranking on brand query — direct SEO theft via domain, no redirect needed.",
+      "title": "TonyBet — beste online casino Nederland (KSA)",
+      "metaDescription": "TonyBet is een KSA-licensed online casino.",
+      "mainText": "TonyBet is een Nederlands KSA-licensed casino. Speel slots, blackjack, roulette en live casino.",
+      "outboundLinks": [
+        { "href": "https://www.tonybet.nl/register", "anchor": "Registreer", "isExternal": false, "domain": "tonybet.nl" }
+      ],
+      "primaryCtaHref": "https://www.tonybet.nl/register",
+      "primaryCtaAnchor": "Registreer",
+      "primaryCtaTarget": "other",
+      "redirectFinalUrl": null,
+      "redirectFinalDomain": null,
+      "redirectChain": null,
+      "hasAffiliateDisclosure": false
+    },
+    "shadyreview.nl": {
+      "_comment": "Edge case: cloaking — anchor text says 'StarCasino' but href resolves through tracker to TonyBet.",
+      "title": "StarCasino ervaringen 2026 — eerlijke review",
+      "metaDescription": "Onze StarCasino review met exclusieve bonus.",
+      "mainText": "Onze ervaring met StarCasino is overwegend positief. Klik hieronder om te spelen bij StarCasino. StarCasino biedt een goede bonus. Speel StarCasino vandaag.",
+      "outboundLinks": [
+        { "href": "https://go.shadyreview.nl/r?id=star", "anchor": "Speel nu bij StarCasino →", "isExternal": true, "domain": "shadyreview.nl" }
+      ],
+      "primaryCtaHref": "https://go.shadyreview.nl/r?id=star",
+      "primaryCtaAnchor": "Speel nu bij StarCasino →",
+      "primaryCtaTarget": "competitor",
+      "redirectFinalUrl": "https://www.tonybet.nl/welcome?aff_id=shady-555",
+      "redirectFinalDomain": "tonybet.nl",
+      "redirectChain": { "hops": 2, "intermediateDomains": ["shadyreview.nl", "go.shadyreview.nl", "tonybet.nl"] },
+      "hasAffiliateDisclosure": false
     }
   }
 }

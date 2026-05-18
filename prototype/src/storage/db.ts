@@ -193,9 +193,12 @@ export function getLatestSnapshot(query: string, geo: string): Snapshot | null {
         mainText: "",
         outboundLinks: [],
         primaryCtaHref: null,
+        primaryCtaAnchor: null,
         primaryCtaTarget: null,
         redirectFinalUrl: null,
         redirectFinalDomain: r.redirect_final_domain,
+        redirectChain: null,
+        hasAffiliateDisclosure: false,
       },
       classification: {
         category: r.category,

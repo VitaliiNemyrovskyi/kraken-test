@@ -47,17 +47,36 @@ Each answer — 2-3 sentences of direct reply + [[wikilinks]] to atomic pages fo
 
 **This is the key question of Task 2.** Decisive signal — **final destination of monetised links after redirect resolution**, NOT brand mention.
 
-| Signal | Affiliate (proper) | Competitor brand thief |
-|---|---|---|
-| Final domain of primary CTA | `starcasino.nl` | other casino from [[../entities/nl-competitor-casinos]] |
-| Outbound link ratio | starLinkRatio ≥ 0.5 | compLinkRatio ≥ 0.4 |
-| Affiliate params on brand links | yes | NO |
-| Affiliate params on competitor links | NO | yes |
-| Brand mention in title/H1/snippet | present (for ranking) | present (for ranking) |
+### 11 classifier signals (implemented in `prototype/`)
 
-**Dual-promote edge case** (site promotes both StarCasino and others): leans towards `competitor_brand_thief` (weight +35 vs +25 for affiliate) — partial traffic diversion to a competitor is already brand-damaging. Recorded in [[../concepts/adr-008-dual-promote-tiebreak]].
+| # | Signal | Direction | Score |
+|---|---|---|---|
+| **R1** | `pageDomain === 'starcasino.nl'` | `official` | +100 |
+| **R2** | `pageDomain ∈ COMPETITOR_CASINOS` (competitor's own site in SERP) | `thief` | +90 |
+| **R3** | **Cloaking:** anchor text says "StarCasino", href → competitor | `thief` | +60 |
+| **R4** | `compLinkRatio ≥ 0.4 AND hasAffParamsToComp` | `thief` | +70 |
+| **R5** | `primaryCtaTarget='competitor' AND brandMentions ≥ 3` | `thief` | +60 |
+| **R6** | `redirectsToComp` (CTA chain ends at competitor) | `thief` | +30 |
+| **R7** | `starLinkRatio ≥ 0.5 AND hasAffParamsToStar` | `affiliate` | +60 |
+| **R8** | `primaryCtaTarget='star' AND redirectsToStar` | `affiliate` | +50 |
+| **R9** | Visible affiliate disclosure ("partnerlink"/"we earn") | `affiliate` | +15 |
+| **R10** | Dual-promote (aff params on brand **and** competitor) | tiebreak | +25 aff / +35 thief |
+| **R11** | Brand mention without monetisation (Wikipedia, news) | `unclear` | +30 |
 
-**Details:** [[../comparisons/affiliate-vs-brand-thief-signals]] — full signals table with weights; [[../concepts/classifier-scoring]] — scoring matrix.
+### 6 patterns the classifier handles
+
+1. **Proper affiliate** (review-style with aff params on CTA) → R7+R8+R9 → 1.00 confidence
+2. **Alternatives listicle** ("StarCasino alternatives" with CTA to JACKS) → R4+R5+R6 → 1.00
+3. **Bonus aggregator** (with a better competitor bonus) → R4+R5 → 1.00
+4. **Cloaking** (anchor "StarCasino" → href competitor) → R3+R5+R6 → 1.00
+5. **Direct competitor's site** (tonybet.nl itself ranking on brand query) → R2 → 0.90
+6. **Informational** (Wikipedia) → R11 → unclear
+
+**Dual-promote edge case** (site promotes both StarCasino and others): leans towards `competitor_brand_thief` (weight +35 vs +25 for affiliate). Recorded in [[../concepts/adr-008-dual-promote-tiebreak]].
+
+**Anti-cloaking defence:** realistic User-Agent + Playwright JS execution + full redirect chain capture + LLM as sanity check (6-shot prompt).
+
+**Full reference page:** [[../comparisons/affiliate-vs-brand-thief-signals]] — detailed breakdown of every signal, all 6 patterns, and false-negative risks.
 
 ---
 

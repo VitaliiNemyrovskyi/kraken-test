@@ -1,6 +1,6 @@
 # Index — kraken-test
 
-_Auto-generated 2026-05-18 • 12 pages_
+_Auto-generated 2026-05-18 • 13 pages_
 
 > Content-oriented catalog of every page in `wiki/`. Updated by
 > `scripts/update_index.py` or during `/wiki-ingest`. Answer queries
@@ -29,3 +29,7 @@ _Auto-generated 2026-05-18 • 12 pages_
 ## Source (1)
 
 - [[sources/kraken-leads-test-task|Kraken Leads — Test Task для AI Engineer (SEO & Affiliate, iGaming)]] — PDF з двома задачами — концепція системи генерації SEO-сайтів + прототип моніторингу брендованої видачі StarCasino NL _(upd 2026-05-18)_
+
+## Comparison (1)
+
+- [[comparisons/affiliate-vs-brand-thief-signals|Affiliate vs Competitor Brand Thief — повний перелік сигналів]] — 11 сигналів класифікатора з вагами; розбір 6 реальних паттернів брендованої видачі; як відрізнити affiliate (веде на бренд) від competitor-brand-thief (краде трафік на конкурента) _(1 sources · upd 2026-05-18)_

@@ -28,6 +28,11 @@ export interface OutboundLink {
   domain: string;
 }
 
+export interface RedirectChain {
+  hops: number;
+  intermediateDomains: string[];
+}
+
 export interface ScrapedPage {
   url: string;
   pageDomain: string;
@@ -37,9 +42,12 @@ export interface ScrapedPage {
   mainText: string;
   outboundLinks: OutboundLink[];
   primaryCtaHref: string | null;
+  primaryCtaAnchor: string | null;
   primaryCtaTarget: "star" | "competitor" | "other" | null;
   redirectFinalUrl: string | null;
   redirectFinalDomain: string | null;
+  redirectChain: RedirectChain | null;
+  hasAffiliateDisclosure: boolean;
   scrapeError?: string;
 }
 
@@ -52,6 +60,7 @@ export interface RuleScores {
 
 export interface RuleSignals {
   isStarOfficial: boolean;
+  pageDomainIsCompetitor: boolean;
   starLinkRatio: number;
   compLinkRatio: number;
   hasAffParamsToStar: boolean;
@@ -61,6 +70,10 @@ export interface RuleSignals {
   brandMentionsInText: number;
   primaryCtaTarget: ScrapedPage["primaryCtaTarget"];
   outboundCasinoLinks: number;
+  ctaAnchorMentionsBrand: boolean;
+  ctaAnchorHrefMismatch: boolean;
+  hasAffiliateDisclosure: boolean;
+  redirectHops: number;
 }
 
 export interface RuleVerdict {

@@ -47,17 +47,36 @@ mirror: ../../wiki-en/synthesis/task-2-answer.md
 
 **Це ключове питання Task 2.** Decisive signal — **final destination of monetised links after redirect resolution**, НЕ brand mention.
 
-| Сигнал | Affiliate (proper) | Competitor brand thief |
-|---|---|---|
-| Кінцевий домен primary CTA | `starcasino.nl` | інше казино з [[../entities/nl-competitor-casinos]] |
-| Outbound link ratio | starLinkRatio ≥ 0.5 | compLinkRatio ≥ 0.4 |
-| Affiliate params на links до бренду | так | НІ |
-| Affiliate params на links до конкурента | НІ | так |
-| Brand mention у title/H1/snippet | присутня (для ranking) | присутня (для ranking) |
+### 11 сигналів класифікатора (реалізовано у `prototype/`)
 
-**Dual-promote edge case** (сайт промує і StarCasino, і інших): схиляється до `competitor_brand_thief` (weight +35 vs +25 для affiliate), бо часткове виведення трафіку на конкурента — це вже шкода для бренду. Зафіксовано в [[../concepts/adr-008-dual-promote-tiebreak]].
+| # | Сигнал | Куди | Вага |
+|---|---|---|---|
+| **R1** | `pageDomain === 'starcasino.nl'` | `official` | +100 |
+| **R2** | `pageDomain ∈ COMPETITOR_CASINOS` (конкурент сам у SERP) | `thief` | +90 |
+| **R3** | **Cloaking:** anchor text каже "StarCasino", href → конкурент | `thief` | +60 |
+| **R4** | `compLinkRatio ≥ 0.4 AND hasAffParamsToComp` | `thief` | +70 |
+| **R5** | `primaryCtaTarget='competitor' AND brandMentions ≥ 3` | `thief` | +60 |
+| **R6** | `redirectsToComp` (CTA chain ends at competitor) | `thief` | +30 |
+| **R7** | `starLinkRatio ≥ 0.5 AND hasAffParamsToStar` | `affiliate` | +60 |
+| **R8** | `primaryCtaTarget='star' AND redirectsToStar` | `affiliate` | +50 |
+| **R9** | Видимий affiliate disclosure ("partnerlink"/"we earn") | `affiliate` | +15 |
+| **R10** | Dual-promote (aff params на бренд **і** на конкурента) | tiebreak | +25 aff / +35 thief |
+| **R11** | Brand mention без монетизації (Wikipedia, news) | `unclear` | +30 |
 
-**Деталі:** [[../comparisons/affiliate-vs-brand-thief-signals]] — повна таблиця сигналів з вагами; [[../concepts/classifier-scoring]] — scoring matrix.
+### 6 паттернів які класифікатор ловить
+
+1. **Proper affiliate** (review-style з aff params на CTA) → R7+R8+R9 → 1.00 confidence
+2. **Alternatives listicle** ("StarCasino alternatives" з CTA на JACKS) → R4+R5+R6 → 1.00
+3. **Bonus aggregator** (з кращим конкурентним бонусом) → R4+R5 → 1.00
+4. **Cloaking** (anchor "StarCasino" → href конкурент) → R3+R5+R6 → 1.00
+5. **Direct competitor's site** (tonybet.nl сам на бренд-запит) → R2 → 0.90
+6. **Informational** (Wikipedia) → R11 → unclear
+
+**Dual-promote edge case** (сайт промує і StarCasino, і інших): схиляється до `competitor_brand_thief` (weight +35 vs +25 для affiliate). Зафіксовано в [[../concepts/adr-008-dual-promote-tiebreak]].
+
+**Anti-cloaking захист:** realistic User-Agent + Playwright JS execution + повний redirect chain capture + LLM as sanity check (6-shot prompt).
+
+**Повна сторінка-довідник:** [[../comparisons/affiliate-vs-brand-thief-signals]] — детальний розбір кожного з 11 сигналів, всіх 6 паттернів, та false-negative ризиків.
 
 ---
 

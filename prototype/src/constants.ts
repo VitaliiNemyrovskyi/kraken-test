@@ -43,3 +43,14 @@ export const CTA_SELECTORS = [
 
 // Maximum redirect hops to follow when resolving primary CTA / affiliate links.
 export const MAX_REDIRECT_HOPS = 5;
+
+// Visible affiliate disclosure patterns (EN + NL).
+// Presence of any → positive signal for "proper affiliate" category.
+// Per EU consumer directive + FTC, affiliates must disclose paid relationships.
+export const AFFILIATE_DISCLOSURE_RE =
+  /\b(affiliate[\s-]*(disclosure|link|programme?|partner)|partnerlink|in\s+samenwerking\s+met|advertorial|we\s+(earn|may\s+earn|receive)\s+(a\s+)?commission|compensated|ondersteund\s+door|affiliate\s+gemarkeerd|gesponsorde?\s+(link|content))/i;
+
+// Brand-name detection in CTA anchor text — used to detect cloaking
+// (anchor mentions brand but href resolves to a competitor).
+export const BRAND_IN_ANCHOR_RE = /star\s*casino/i;
+

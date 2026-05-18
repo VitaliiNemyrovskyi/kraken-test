@@ -1,9 +1,11 @@
 import { chromium, type Browser } from "playwright";
 import { config } from "../config.js";
 import {
+  AFFILIATE_DISCLOSURE_RE,
   COMPETITOR_CASINO_DOMAINS,
+  MAX_REDIRECT_HOPS,
 } from "../constants.js";
-import type { ScrapedPage, SerpResult } from "../types.js";
+import type { RedirectChain, ScrapedPage, SerpResult } from "../types.js";
 import { extractFromHtml, etld1 } from "./extractors.js";
 import { waitForDomain } from "./rate-limiter.js";
 import { loadFixture } from "../serp/mock-provider.js";
@@ -33,22 +35,51 @@ export async function closeBrowser(): Promise<void> {
 
 async function resolveRedirectChain(
   startUrl: string,
-): Promise<{ finalUrl: string; finalDomain: string }> {
-  // HEAD-follow up to MAX_REDIRECT_HOPS. Some affiliate networks serve only GET — fall back.
-  try {
-    const res = await fetch(startUrl, {
-      method: "GET",
-      redirect: "follow",
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 KrakenLeads-Monitor/0.1",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
-    return { finalUrl: res.url, finalDomain: etld1(res.url) };
-  } catch {
-    return { finalUrl: startUrl, finalDomain: etld1(startUrl) };
+): Promise<{
+  finalUrl: string;
+  finalDomain: string;
+  chain: RedirectChain;
+}> {
+  // Manual hop-by-hop follow so we can record intermediate domains and detect
+  // long/suspicious chains. Stops at MAX_REDIRECT_HOPS or when the response
+  // is not a redirect.
+  const intermediateDomains: string[] = [];
+  let currentUrl = startUrl;
+  let hops = 0;
+  const startDomain = etld1(startUrl);
+  if (startDomain) intermediateDomains.push(startDomain);
+  for (let i = 0; i < MAX_REDIRECT_HOPS; i++) {
+    try {
+      const res = await fetch(currentUrl, {
+        method: "GET",
+        redirect: "manual",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 KrakenLeads-Monitor/0.1",
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (res.status >= 300 && res.status < 400) {
+        const loc = res.headers.get("location");
+        if (!loc) break;
+        currentUrl = new URL(loc, currentUrl).href;
+        hops++;
+        const d = etld1(currentUrl);
+        if (d && intermediateDomains[intermediateDomains.length - 1] !== d) {
+          intermediateDomains.push(d);
+        }
+      } else {
+        break;
+      }
+    } catch {
+      break;
+    }
   }
+  return {
+    finalUrl: currentUrl,
+    finalDomain: etld1(currentUrl),
+    chain: { hops, intermediateDomains },
+  };
 }
 
 export interface ScrapeOptions {
@@ -70,34 +101,43 @@ function scrapeFromFixture(serpResult: SerpResult): ScrapedPage {
   const stub = (fixture._scraped as Record<string, Partial<ScrapedPage>>)[
     serpResult.domain
   ];
+  const fetchedAt = new Date().toISOString();
   if (!stub) {
     return {
       url: serpResult.url,
       pageDomain: serpResult.domain,
-      fetchedAt: new Date().toISOString(),
+      fetchedAt,
       title: serpResult.title,
       metaDescription: "",
       mainText: "",
       outboundLinks: [],
       primaryCtaHref: null,
+      primaryCtaAnchor: null,
       primaryCtaTarget: null,
       redirectFinalUrl: null,
       redirectFinalDomain: null,
+      redirectChain: null,
+      hasAffiliateDisclosure: false,
       scrapeError: "no fixture entry",
     };
   }
+  const mainText = stub.mainText ?? "";
   return {
     url: serpResult.url,
     pageDomain: stub.pageDomain ?? serpResult.domain,
-    fetchedAt: new Date().toISOString(),
+    fetchedAt,
     title: stub.title ?? serpResult.title,
     metaDescription: stub.metaDescription ?? "",
-    mainText: stub.mainText ?? "",
+    mainText,
     outboundLinks: stub.outboundLinks ?? [],
     primaryCtaHref: stub.primaryCtaHref ?? null,
+    primaryCtaAnchor: stub.primaryCtaAnchor ?? null,
     primaryCtaTarget: stub.primaryCtaTarget ?? null,
     redirectFinalUrl: stub.redirectFinalUrl ?? null,
     redirectFinalDomain: stub.redirectFinalDomain ?? null,
+    redirectChain: stub.redirectChain ?? null,
+    hasAffiliateDisclosure:
+      stub.hasAffiliateDisclosure ?? AFFILIATE_DISCLOSURE_RE.test(mainText),
   };
 }
 
@@ -125,10 +165,12 @@ async function scrapeViaPlaywright(
 
     let redirectFinalUrl: string | null = null;
     let redirectFinalDomain: string | null = null;
+    let redirectChain: RedirectChain | null = null;
     if (ext.primaryCtaHref) {
       const resolved = await resolveRedirectChain(ext.primaryCtaHref);
       redirectFinalUrl = resolved.finalUrl;
       redirectFinalDomain = resolved.finalDomain;
+      redirectChain = resolved.chain;
     }
 
     return {
@@ -140,9 +182,12 @@ async function scrapeViaPlaywright(
       mainText: ext.mainText,
       outboundLinks: ext.outboundLinks,
       primaryCtaHref: ext.primaryCtaHref,
+      primaryCtaAnchor: ext.primaryCtaAnchor,
       primaryCtaTarget: categoriseCtaTarget(redirectFinalDomain),
       redirectFinalUrl,
       redirectFinalDomain,
+      redirectChain,
+      hasAffiliateDisclosure: AFFILIATE_DISCLOSURE_RE.test(ext.mainText),
     };
   } catch (e) {
     return {
@@ -154,9 +199,12 @@ async function scrapeViaPlaywright(
       mainText: "",
       outboundLinks: [],
       primaryCtaHref: null,
+      primaryCtaAnchor: null,
       primaryCtaTarget: null,
       redirectFinalUrl: null,
       redirectFinalDomain: null,
+      redirectChain: null,
+      hasAffiliateDisclosure: false,
       scrapeError: (e as Error).message,
     };
   }
