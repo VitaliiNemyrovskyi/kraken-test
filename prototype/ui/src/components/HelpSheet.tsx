@@ -110,6 +110,7 @@ export function HelpSheet() {
                   <li>• {t("help.signals.serpItems.0")}</li>
                   <li>• {t("help.signals.serpItems.1")}</li>
                   <li>• {t("help.signals.serpItems.2")}</li>
+                  <li>• {t("help.signals.serpItems.3")}</li>
                 </ul>
               </div>
               <div className="rounded-md border bg-card/40 p-3">

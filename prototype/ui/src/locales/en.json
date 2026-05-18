@@ -84,52 +84,53 @@
     "button": "Help",
     "open": "Open help",
     "title": "How this works",
-    "subtitle": "Signal architecture, why some verdicts end up Unclear, how monitoring runs.",
+    "subtitle": "Plain English: what you're looking at, how I classify, why some end up unclear.",
     "intro": {
-      "title": "What the dashboard tracks",
-      "body": "Every scheduler tick fetches the top-10 Google SERP for a branded query (default: 'starcasino', geo Netherlands), scrapes each result via headless Chromium, then classifies the domain into one of four buckets. Snapshots are stored in SQLite — the history chart shows how the mix shifts over time."
+      "title": "What you're looking at",
+      "body": "I regularly check Google Netherlands for the query 'starcasino' and show you who's in the top results. The dashboard tells you: which site IS the brand, who's honestly promoting it for a commission, and who's exploiting the brand's name to redirect users to a different casino."
     },
     "categories": {
-      "title": "Categories",
-      "official": "The brand domain itself ranking (starcasino.nl) — instantly decisive, +100 from the rule signal.",
-      "affiliate": "A third-party site that monetises in the brand's favour: the primary CTA resolves to starcasino.nl with an affiliate tag (btag, aff_id…). Most review portals belong here.",
-      "thief": "Most threatening: the page ranks on the brand query but the CTA sends users to OTHER casinos (jacks.nl, tonybet.nl…). The brand is just SEO bait; monetisation flows to competitors.",
-      "unclear": "Not enough signal — informational article, Wikipedia, or a site behind bot protection that returned an empty HTML."
+      "title": "Four kinds of sites",
+      "official": "StarCasino itself (starcasino.nl). Usually ranks first.",
+      "affiliate": "An honest partner. Runs reviews or 'best casinos' lists, but when a user wants to sign up they're sent to StarCasino. Earns a cut on each referred customer.",
+      "thief": "The most threatening category. Ranks on the 'starcasino' query — uses the brand as bait — but the 'Play' button leads to a different casino (Jack's, TonyBet, Holland Casino). Intercepts a customer who came looking for the brand.",
+      "unclear": "Not enough signal to classify confidently. Typically Wikipedia, Trustpilot, Google Play Store — these pages simply have no monetised buttons."
     },
     "signals": {
-      "title": "Signal architecture",
-      "intro": "The classifier fuses deterministic rule signals with an LLM verdict (Claude Opus 4.7 via OpenRouter). Signals split into two layers by whether they need a successful page scrape:",
-      "serpLayer": "SERP layer (always available)",
-      "serpBody": "Visible right in the SERP — can't be hidden by Cloudflare.",
+      "title": "What I look at",
+      "intro": "The algorithm combines a simple rule set with an LLM's opinion (Claude). Two groups of signals:",
+      "serpLayer": "From the Google result itself",
+      "serpBody": "Visible right away, without even opening the site.",
       "serpItems": {
-        "0": "Page domain = brand domain → official",
-        "1": "Domain contains the brand stem (starcasino-nl.com) → affiliate/thief prior",
-        "2": "Title fits a review/listicle pattern (review, top 10, beste, alternatieven) → affiliate prior"
+        "0": "Is the page on the StarCasino domain itself",
+        "1": "Is the page on a known competitor's domain (jacks.nl, tonybet.nl…)",
+        "2": "Does the domain contain the word 'starcasino' (typosquat — e.g. starcasino-nl.com)",
+        "3": "Does the page title look like a review or ranking ('review', 'top 10', 'beste', 'alternatieven')"
       },
-      "pageLayer": "Page layer (needs a scrape)",
-      "pageBody": "Stronger but brittle: bot protection or JS-injected CTAs zero them all out.",
+      "pageLayer": "From opening the page",
+      "pageBody": "More accurate, but not always available — many casino sites block bots.",
       "pageItems": {
-        "0": "Outbound links → starcasino.nl or a competitor + affiliate params",
-        "1": "Primary CTA target after redirect resolution",
-        "2": "Anchor says 'brand', href resolves to a competitor → cloaking",
-        "3": "Visible affiliate disclosure (EU/FTC compliance)"
+        "0": "Where the main 'Play' button leads — to StarCasino, or to a competitor",
+        "1": "Whether links carry affiliate tags (?btag=, ?aff_id=…)",
+        "2": "How often the brand name appears in the page body",
+        "3": "Whether there's a visible affiliate disclosure (EU/FTC requirement)"
       },
-      "fusion": "Final category = argmax(rule × 0.6 + LLM × 0.4); if top score < 30 → Unclear. When the LLM says 'Unclear' it's treated as abstention, not a vote against — rule scores then act at weight 1.0."
+      "fusion": "All signals add up into a per-category score. The category with the highest score wins. If no category scores high enough, the verdict is 'Unclear'. The LLM is used as a second opinion on borderline cases."
     },
     "unclear": {
-      "title": "Why so many Unclear?",
-      "body1": "The decisive signal for telling 'affiliate-to-brand' from 'competitor brand thief' is the final domain after clicking the primary CTA and resolving the redirect chain. `final == starcasino.nl + btag=…` → affiliate; `final == jacks.nl + aff_id=…` → thief.",
-      "body2": "On the real NL SERP, 6 of 10 top results sit behind Cloudflare/DataDome bot protection. Headless Playwright gets a challenge page with no body content; affiliate links are typically injected via JS after the load event.",
-      "calloutTitle": "Honest forecast",
-      "calloutBody": "A passive scraper has a floor on Unclear. Production-grade classification needs an active probe — click the CTA in an isolated browser context, await page.waitForURL(). Out of the prototype's scope — documented in wiki/synthesis/phase-plan."
+      "title": "Why some end up 'Unclear'",
+      "body1": "The most accurate way to tell an 'affiliate of the brand' from a 'brand thief' is to click the 'Play' button and see where the redirect chain physically ends. Ends at starcasino.nl with an affiliate tag → affiliate. Ends at a different casino → thief.",
+      "body2": "But many casino sites are bot-protected (Cloudflare, DataDome). When the system tries to open the page, it gets 'verify you're not a bot' instead of real content. So the 'Play' button is sometimes simply invisible to us.",
+      "calloutTitle": "Honest take",
+      "calloutBody": "The prototype has a floor on 'Unclear' — you can't get below it without actively clicking buttons. A production system would add a separate browser that physically clicks the button, follows the redirects, and records where it landed. That's beyond the prototype's scope."
     },
     "monitoring": {
-      "title": "How monitoring works",
-      "body": "The scheduler (node-cron) lives in a separate worker container and reads the desired cron from SQLite (scheduler_control). Default cadence: every 4 hours (180 runs/month, within the free SerpAPI quota of 250/month). Settings let you change the interval, fire a one-off run, or stop the scheduler. The web container only writes desired_cron — the worker reconciles."
+      "title": "How regular checks work",
+      "body": "By default the system checks the SERP every 4 hours (180 runs/month, within SerpAPI's free tier of 250/month). In Settings you can change the interval, fire a one-off check, or stop the auto-checks. Every run is saved — the History chart shows how the mix shifts over time."
     },
     "stack": {
-      "title": "Stack",
-      "body": "Worker (Node 20 + TypeScript): node-cron, SerpAPI / Playwright fallback, headless Chromium, cheerio, better-sqlite3, OpenRouter (Claude Opus 4.7), whoiser for WHOIS enrichment. Web (Fastify + React + Vite + Tailwind + shadcn/ui + Recharts). Infra: Docker Compose with a multi-stage Dockerfile, Caddy reverse proxy + DNS-01 Let's Encrypt, Cloudflare DNS-only."
+      "title": "Under the hood",
+      "body": "Node.js + TypeScript on the backend. Playwright for scraping (drives a real Chromium browser). SerpAPI for Google results. SQLite for storage. Claude Opus 4.7 via OpenRouter as a second opinion. React + Tailwind on the frontend. Packaged in Docker, hosted on a Contabo VPS, fronted by Caddy with a Let's Encrypt certificate."
     }
   },
   "keyword": {
