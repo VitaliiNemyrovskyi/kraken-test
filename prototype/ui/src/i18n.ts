@@ -4,7 +4,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import en from "./locales/en.json";
 import uk from "./locales/uk.json";
 
-export const SUPPORTED_LANGUAGES = ["uk", "en"] as const;
+export const SUPPORTED_LANGUAGES = ["en", "uk"] as const;
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 void i18n
@@ -15,11 +15,13 @@ void i18n
       en: { translation: en },
       uk: { translation: uk },
     },
-    fallbackLng: "uk",
+    fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES,
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator", "htmlTag"],
+      // English is the default for new users; user's choice persists via localStorage.
+      // Browser-language detection intentionally NOT consulted — keeps the default deterministic.
+      order: ["localStorage", "htmlTag"],
       caches: ["localStorage"],
       lookupLocalStorage: "kraken_lang",
     },
