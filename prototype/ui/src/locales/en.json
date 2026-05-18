@@ -84,53 +84,53 @@
     "button": "Help",
     "open": "Open help",
     "title": "How this works",
-    "subtitle": "Plain English: what you're looking at, how I classify, why some end up unclear.",
+    "subtitle": "Category definitions, classifier signals, and monitoring limits.",
     "intro": {
-      "title": "What you're looking at",
-      "body": "I regularly check Google Netherlands for the query 'starcasino' and show you who's in the top results. The dashboard tells you: which site IS the brand, who's honestly promoting it for a commission, and who's exploiting the brand's name to redirect users to a different casino."
+      "title": "Purpose",
+      "body": "Periodic monitoring of Google's top-10 SERP for a branded query (default: 'starcasino', geo Netherlands). Each domain is classified by combining SERP signals with page-scrape signals. Results are persisted as snapshots — the History chart shows the category distribution over time."
     },
     "categories": {
-      "title": "Four kinds of sites",
-      "official": "StarCasino itself (starcasino.nl). Usually ranks first.",
-      "affiliate": "An honest partner. Runs reviews or 'best casinos' lists, but when a user wants to sign up they're sent to StarCasino. Earns a cut on each referred customer.",
-      "thief": "The most threatening category. Ranks on the 'starcasino' query — uses the brand as bait — but the 'Play' button leads to a different casino (Jack's, TonyBet, Holland Casino). Intercepts a customer who came looking for the brand.",
-      "unclear": "Not enough signal to classify confidently. Typically Wikipedia, Trustpilot, Google Play Store — these pages simply have no monetised buttons."
+      "title": "Categories",
+      "official": "The brand domain itself (starcasino.nl).",
+      "affiliate": "A partner site. Ranks on the brand query and routes traffic to the official site with an affiliate tag (btag, aff_id). Monetises via brand-side conversions.",
+      "thief": "A brand-theft site. Ranks on the brand query, but the primary CTA leads to a competing casino (Jack's, TonyBet, Holland Casino). Intercepts brand traffic to a third party's benefit.",
+      "unclear": "Insufficient signal to classify. Typically: informational pages (Wikipedia, Trustpilot, Google Play) or sites behind bot protection that returned no useful content."
     },
     "signals": {
-      "title": "What I look at",
-      "intro": "The algorithm combines a simple rule set with an LLM's opinion (Claude). Two groups of signals:",
-      "serpLayer": "From the Google result itself",
-      "serpBody": "Visible right away, without even opening the site.",
+      "title": "Classifier signals",
+      "intro": "The classifier combines deterministic rules with an LLM verdict (Claude Opus 4.7 via OpenRouter). Signals split into two groups by whether they require a successful page scrape.",
+      "serpLayer": "SERP layer",
+      "serpBody": "Derived from SERP data — independent of page availability.",
       "serpItems": {
-        "0": "Is the page on the StarCasino domain itself",
-        "1": "Is the page on a known competitor's domain (jacks.nl, tonybet.nl…)",
-        "2": "Does the domain contain the word 'starcasino' (typosquat — e.g. starcasino-nl.com)",
-        "3": "Does the page title look like a review or ranking ('review', 'top 10', 'beste', 'alternatieven')"
+        "0": "Page domain matches the brand domain",
+        "1": "Page domain matches a known competitor (jacks.nl, tonybet.nl, …)",
+        "2": "Domain contains the brand stem (typosquat — starcasino-nl.com etc.)",
+        "3": "Page title matches a review or listicle pattern (review, top N, beste, alternatieven)"
       },
-      "pageLayer": "From opening the page",
-      "pageBody": "More accurate, but not always available — many casino sites block bots.",
+      "pageLayer": "Scrape layer",
+      "pageBody": "More precise but requires the page to load. Bot protection (Cloudflare, DataDome) zeroes these out.",
       "pageItems": {
-        "0": "Where the main 'Play' button leads — to StarCasino, or to a competitor",
-        "1": "Whether links carry affiliate tags (?btag=, ?aff_id=…)",
-        "2": "How often the brand name appears in the page body",
-        "3": "Whether there's a visible affiliate disclosure (EU/FTC requirement)"
+        "0": "Final domain after primary-CTA redirects",
+        "1": "Affiliate parameters in outbound links (?btag=, ?aff_id=, ?ref=…)",
+        "2": "Brand mention count in the page body",
+        "3": "Visible affiliate disclosure (EU / FTC compliance)"
       },
-      "fusion": "All signals add up into a per-category score. The category with the highest score wins. If no category scores high enough, the verdict is 'Unclear'. The LLM is used as a second opinion on borderline cases."
+      "fusion": "Signals accumulate into per-category scores. The highest-scoring category wins; below threshold → 'unclear'. The LLM verdict is weighted alongside rules (60/40), except when the LLM returns 'unclear' at low confidence — rules then act alone."
     },
     "unclear": {
-      "title": "Why some end up 'Unclear'",
-      "body1": "The most accurate way to tell an 'affiliate of the brand' from a 'brand thief' is to click the 'Play' button and see where the redirect chain physically ends. Ends at starcasino.nl with an affiliate tag → affiliate. Ends at a different casino → thief.",
-      "body2": "But many casino sites are bot-protected (Cloudflare, DataDome). When the system tries to open the page, it gets 'verify you're not a bot' instead of real content. So the 'Play' button is sometimes simply invisible to us.",
-      "calloutTitle": "Honest take",
-      "calloutBody": "The prototype has a floor on 'Unclear' — you can't get below it without actively clicking buttons. A production system would add a separate browser that physically clicks the button, follows the redirects, and records where it landed. That's beyond the prototype's scope."
+      "title": "Passive-scrape limitation",
+      "body1": "The decisive signal for distinguishing 'affiliate' from 'brand thief' is the final domain in the redirect chain after clicking the primary CTA. `final == starcasino.nl + btag=…` → affiliate; `final == jacks.nl + aff_id=…` → thief.",
+      "body2": "Many casino sites are bot-protected. A headless browser receives a challenge page without CTA content, or CTAs are injected by JS after page load. As a result a portion of results remains in 'unclear'.",
+      "calloutTitle": "Forward path",
+      "calloutBody": "Active probing — an isolated browser context that clicks the CTA, awaits redirects, and records the final URL. Out of scope for the current prototype; documented in `wiki/synthesis/phase-plan`."
     },
     "monitoring": {
-      "title": "How regular checks work",
-      "body": "By default the system checks the SERP every 4 hours (180 runs/month, within SerpAPI's free tier of 250/month). In Settings you can change the interval, fire a one-off check, or stop the auto-checks. Every run is saved — the History chart shows how the mix shifts over time."
+      "title": "Check schedule",
+      "body": "The scheduler runs analysis on a cron expression. Default: every 4 hours (180 runs/month, within SerpAPI's free tier of 250/month). Settings let you change the interval, trigger a one-off check, or pause the schedule. Each run is persisted as a snapshot with a unique ID."
     },
     "stack": {
-      "title": "Under the hood",
-      "body": "Node.js + TypeScript on the backend. Playwright for scraping (drives a real Chromium browser). SerpAPI for Google results. SQLite for storage. Claude Opus 4.7 via OpenRouter as a second opinion. React + Tailwind on the frontend. Packaged in Docker, hosted on a Contabo VPS, fronted by Caddy with a Let's Encrypt certificate."
+      "title": "Technology stack",
+      "body": "Backend: Node.js 20, TypeScript, Fastify, Playwright (Chromium), better-sqlite3, OpenRouter API. Frontend: React, Vite, Tailwind, shadcn/ui, Recharts. Infrastructure: Docker Compose (web + worker), Caddy reverse proxy with DNS-01 Let's Encrypt, Cloudflare (DNS-only)."
     }
   },
   "keyword": {
