@@ -55,3 +55,18 @@ CREATE TABLE IF NOT EXISTS domain_history (
   PRIMARY KEY(domain, keyword_id),
   FOREIGN KEY(keyword_id) REFERENCES keywords(id)
 );
+
+CREATE TABLE IF NOT EXISTS domain_enrichment (
+  domain                TEXT PRIMARY KEY,
+  registrar             TEXT,
+  registrant_org        TEXT,
+  registrant_country    TEXT,
+  domain_created        TEXT,
+  domain_expires        TEXT,
+  nameservers_json      TEXT,
+  monthly_visitors_est  INTEGER,
+  traffic_rank          INTEGER,
+  source                TEXT NOT NULL CHECK(source IN ('whois','fixture','heuristic')),
+  updated_at            TEXT NOT NULL,
+  fetch_error           TEXT
+);

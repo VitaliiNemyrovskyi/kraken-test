@@ -4,6 +4,7 @@ import { fetchSerp } from "../serp/index.js";
 import { scrapePage, closeBrowser } from "../scraper/page-scraper.js";
 import { classify } from "../classifier/index.js";
 import { listKeywords, saveSnapshot } from "../storage/db.js";
+import { enrichDomains } from "../enrichment/index.js";
 import type { AnalyzedResult } from "../types.js";
 
 export interface AnalyzeOptions {
@@ -46,6 +47,12 @@ export async function runAnalyze(opts?: Partial<AnalyzeOptions>): Promise<Analyz
 
   const snapshotId = saveSnapshot(query, geo, brand, config.SERP_SOURCE, analyzed);
   console.log(`[analyze] saved snapshot #${snapshotId}`);
+
+  // Enrichment: WHOIS + traffic estimate, parallel, cached 7 days. Best-effort.
+  const domains = analyzed.map((r) => r.serp.domain);
+  process.stdout.write("[analyze] enriching domains …");
+  const enrichments = await enrichDomains(domains);
+  process.stdout.write(` ok (${enrichments.length}/${domains.length})\n`);
 
   const counts: Record<string, number> = {};
   for (const r of analyzed) {

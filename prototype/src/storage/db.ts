@@ -3,7 +3,7 @@ import { readFileSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "../config.js";
-import type { AnalyzedResult, Category, Snapshot } from "../types.js";
+import type { AnalyzedResult, Category, DomainEnrichment, Snapshot } from "../types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCHEMA_PATH = resolve(__dirname, "./schema.sql");
@@ -38,6 +38,93 @@ export function listKeywords(): Keyword[] {
 export function addKeyword(query: string, geo: string, brand: string): Keyword {
   const id = getOrCreateKeyword(query, geo, brand);
   return { id, query, geo, brand };
+}
+
+interface EnrichmentRow {
+  domain: string;
+  registrar: string | null;
+  registrant_org: string | null;
+  registrant_country: string | null;
+  domain_created: string | null;
+  domain_expires: string | null;
+  nameservers_json: string | null;
+  monthly_visitors_est: number | null;
+  traffic_rank: number | null;
+  source: "whois" | "fixture" | "heuristic";
+  updated_at: string;
+  fetch_error: string | null;
+}
+
+function rowToEnrichment(r: EnrichmentRow): DomainEnrichment {
+  return {
+    domain: r.domain,
+    registrar: r.registrar,
+    registrantOrg: r.registrant_org,
+    registrantCountry: r.registrant_country,
+    domainCreated: r.domain_created,
+    domainExpires: r.domain_expires,
+    nameservers: r.nameservers_json ? (JSON.parse(r.nameservers_json) as string[]) : [],
+    monthlyVisitorsEst: r.monthly_visitors_est ?? 0,
+    trafficRank: r.traffic_rank ?? 0,
+    source: r.source,
+    updatedAt: r.updated_at,
+    fetchError: r.fetch_error,
+  };
+}
+
+export function getEnrichment(domain: string): DomainEnrichment | null {
+  const row = db
+    .prepare("SELECT * FROM domain_enrichment WHERE domain = ?")
+    .get(domain) as EnrichmentRow | undefined;
+  return row ? rowToEnrichment(row) : null;
+}
+
+export function getEnrichments(domains: string[]): Record<string, DomainEnrichment> {
+  if (domains.length === 0) return {};
+  const placeholders = domains.map(() => "?").join(",");
+  const rows = db
+    .prepare(`SELECT * FROM domain_enrichment WHERE domain IN (${placeholders})`)
+    .all(...domains) as EnrichmentRow[];
+  const out: Record<string, DomainEnrichment> = {};
+  for (const r of rows) out[r.domain] = rowToEnrichment(r);
+  return out;
+}
+
+export function upsertEnrichment(e: DomainEnrichment): void {
+  db.prepare(
+    `INSERT INTO domain_enrichment
+     (domain, registrar, registrant_org, registrant_country, domain_created,
+      domain_expires, nameservers_json, monthly_visitors_est, traffic_rank,
+      source, updated_at, fetch_error)
+     VALUES (@domain, @registrar, @registrantOrg, @registrantCountry, @domainCreated,
+             @domainExpires, @nameserversJson, @monthlyVisitorsEst, @trafficRank,
+             @source, @updatedAt, @fetchError)
+     ON CONFLICT(domain) DO UPDATE SET
+       registrar = excluded.registrar,
+       registrant_org = excluded.registrant_org,
+       registrant_country = excluded.registrant_country,
+       domain_created = excluded.domain_created,
+       domain_expires = excluded.domain_expires,
+       nameservers_json = excluded.nameservers_json,
+       monthly_visitors_est = excluded.monthly_visitors_est,
+       traffic_rank = excluded.traffic_rank,
+       source = excluded.source,
+       updated_at = excluded.updated_at,
+       fetch_error = excluded.fetch_error`,
+  ).run({
+    domain: e.domain,
+    registrar: e.registrar,
+    registrantOrg: e.registrantOrg,
+    registrantCountry: e.registrantCountry,
+    domainCreated: e.domainCreated,
+    domainExpires: e.domainExpires,
+    nameserversJson: JSON.stringify(e.nameservers),
+    monthlyVisitorsEst: e.monthlyVisitorsEst,
+    trafficRank: e.trafficRank,
+    source: e.source,
+    updatedAt: e.updatedAt,
+    fetchError: e.fetchError,
+  });
 }
 
 export function deleteKeyword(id: number): boolean {

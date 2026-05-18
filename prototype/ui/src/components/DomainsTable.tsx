@@ -1,14 +1,17 @@
 import { Fragment, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronRight, ExternalLink, Layers } from "lucide-react";
-import type { Category, ResultRow } from "../types";
+import type { Category, DomainEnrichment, ResultRow } from "../types";
 import { Badge } from "./ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { DomainEnrichmentPanel } from "./DomainEnrichmentPanel";
 
 type GroupBy = "none" | "category" | "redirect" | "confidence";
 
 interface Props {
   results: ResultRow[];
+  enrichment: Record<string, DomainEnrichment>;
+  locale: string;
 }
 
 interface GroupedSection {
@@ -49,7 +52,7 @@ function sortKeys(mode: GroupBy, a: string, b: string): number {
   return a.localeCompare(b);
 }
 
-export function DomainsTable({ results }: Props) {
+export function DomainsTable({ results, enrichment, locale }: Props) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [groupBy, setGroupBy] = useState<GroupBy>("none");
@@ -201,21 +204,27 @@ export function DomainsTable({ results }: Props) {
                     {isOpen && (
                       <TableRow className="hover:bg-transparent">
                         <TableCell colSpan={6} className="bg-muted/20">
-                          <div className="space-y-2 py-2 pl-12">
-                            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                              {t("table.row.title")}
-                            </p>
-                            <p className="text-sm">{r.serp.title}</p>
-                            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                              {t("table.row.snippet")}
-                            </p>
-                            <p className="text-sm text-muted-foreground">{r.serp.snippet}</p>
-                            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                              {t("table.row.explanation")}
-                            </p>
-                            <p className="font-mono text-xs text-muted-foreground">
-                              {r.classification.explanation}
-                            </p>
+                          <div className="space-y-4 py-3 pl-12 pr-2">
+                            <DomainEnrichmentPanel
+                              enrichment={enrichment[r.serp.domain]}
+                              locale={locale}
+                            />
+                            <div className="border-t pt-3">
+                              <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                {t("table.row.title")}
+                              </p>
+                              <p className="text-sm">{r.serp.title}</p>
+                              <p className="mb-1 mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                {t("table.row.snippet")}
+                              </p>
+                              <p className="text-sm text-muted-foreground">{r.serp.snippet}</p>
+                              <p className="mb-1 mt-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                {t("table.row.explanation")}
+                              </p>
+                              <p className="font-mono text-xs text-muted-foreground">
+                                {r.classification.explanation}
+                              </p>
+                            </div>
                           </div>
                         </TableCell>
                       </TableRow>

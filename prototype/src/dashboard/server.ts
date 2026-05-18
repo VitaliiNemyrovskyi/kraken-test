@@ -10,6 +10,7 @@ import {
   deleteKeyword,
   getCategorySummary,
   getDomainsByCategory,
+  getEnrichments,
   getHistory,
   getLatestSnapshot,
   listKeywords,
@@ -53,7 +54,10 @@ export async function createApp(): Promise<FastifyInstance> {
       geo?: string;
     };
     const snapshot = getLatestSnapshot(query, geo);
-    return { snapshot };
+    const enrichment = snapshot
+      ? getEnrichments(snapshot.results.map((r) => r.serp.domain))
+      : {};
+    return { snapshot, enrichment };
   });
 
   app.get("/api/domains/:category", async (req) => {

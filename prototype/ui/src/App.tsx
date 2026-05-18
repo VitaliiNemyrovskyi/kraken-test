@@ -8,7 +8,7 @@ import { HistoryChart } from "./components/HistoryChart";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { KeywordSelector, type Keyword } from "./components/KeywordSelector";
-import type { HistoryResponse, Summary, SnapshotResponse } from "./types";
+import type { DomainEnrichment, HistoryResponse, Summary, SnapshotResponse } from "./types";
 
 async function fetchJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -24,6 +24,7 @@ export function App() {
   const [selected, setSelected] = useState<Keyword | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [snapshot, setSnapshot] = useState<SnapshotResponse["snapshot"]>(null);
+  const [enrichment, setEnrichment] = useState<Record<string, DomainEnrichment>>({});
   const [history, setHistory] = useState<HistoryResponse["points"]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,6 +58,7 @@ export function App() {
         .then(([s, l, h]) => {
           setSummary(s);
           setSnapshot(l.snapshot);
+          setEnrichment(l.enrichment ?? {});
           setHistory(h.points);
         })
         .catch((e: Error) => setError(e.message));
@@ -154,7 +156,11 @@ export function App() {
         </CardHeader>
         <CardContent>
           {snapshot && snapshot.results.length > 0 ? (
-            <DomainsTable results={snapshot.results} />
+            <DomainsTable
+              results={snapshot.results}
+              enrichment={enrichment}
+              locale={locale}
+            />
           ) : (
             <p className="text-sm text-muted-foreground">{t("table.empty")}</p>
           )}

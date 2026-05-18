@@ -104,5 +104,21 @@
       "medium": "Medium (0.50–0.85)",
       "low": "Low (<0.50)"
     }
+  },
+  "enrichment": {
+    "registration": "Registration (WHOIS)",
+    "registrar": "Registrar",
+    "registrant": "Registrant",
+    "country": "Country",
+    "created": "Created",
+    "expires": "Expires",
+    "yearsOld": "{{count}} yrs",
+    "nameservers": "Nameservers",
+    "traffic": "Traffic",
+    "monthlyVisitors": "Monthly visitors",
+    "globalRank": "Global rank",
+    "estimatedLabel": "estimated",
+    "sourceLabel": "Source",
+    "unavailable": "Enrichment data not yet collected — re-run analyze."
   }
 }

@@ -104,5 +104,21 @@
       "medium": "Середня (0.50–0.85)",
       "low": "Низька (<0.50)"
     }
+  },
+  "enrichment": {
+    "registration": "Реєстрація (WHOIS)",
+    "registrar": "Реєстратор",
+    "registrant": "Власник",
+    "country": "Країна",
+    "created": "Зареєстровано",
+    "expires": "Спливає",
+    "yearsOld": "{{count}} р.",
+    "nameservers": "DNS-сервери",
+    "traffic": "Трафік",
+    "monthlyVisitors": "Відвідувачів/міс",
+    "globalRank": "Глобальний ранг",
+    "estimatedLabel": "оцінка",
+    "sourceLabel": "Джерело",
+    "unavailable": "Дані ще не зібрано — перезапустіть аналіз."
   }
 }

@@ -110,3 +110,18 @@ export interface Snapshot {
   source: SerpSource;
   results: AnalyzedResult[];
 }
+
+export interface DomainEnrichment {
+  domain: string;
+  registrar: string | null;
+  registrantOrg: string | null;
+  registrantCountry: string | null;
+  domainCreated: string | null;
+  domainExpires: string | null;
+  nameservers: string[];
+  monthlyVisitorsEst: number;
+  trafficRank: number;
+  source: "whois" | "fixture" | "heuristic";
+  updatedAt: string;
+  fetchError: string | null;
+}

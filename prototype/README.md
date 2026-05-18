@@ -26,6 +26,7 @@
 | **i18n** | **react-i18next** з UA + EN locales, toggle у хедері, persistence через localStorage |
 | Icons | lucide-react |
 | Validation | `zod` runtime contracts |
+| **Domain enrichment** | **WHOIS via `whoiser`** (registrar, registrant org/country, creation/expiry, nameservers) + traffic estimate (demo: heuristic; production: SimilarWeb/Ahrefs/Cloudflare Radar). Cached 7 днів у `domain_enrichment` |
 
 ---
 
@@ -146,6 +147,7 @@ Dashboard на `http://localhost:3000` показує:
 | GET | `/api/keywords` | List tracked keywords (auto-seeds default on first call) |
 | POST | `/api/keywords` | `{ query, geo, brand }` → add new |
 | DELETE | `/api/keywords/:id` | Cascade delete: snapshots + classifications + history |
+| GET | `/api/latest` (extended) | Тепер повертає `{ snapshot, enrichment: Record<domain, …> }` |
 
 ---
 

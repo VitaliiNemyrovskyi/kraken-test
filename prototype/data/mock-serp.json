@@ -259,5 +259,127 @@
       "redirectChain": { "hops": 2, "intermediateDomains": ["shadyreview.nl", "go.shadyreview.nl", "tonybet.nl"] },
       "hasAffiliateDisclosure": false
     }
+  },
+  "_enrichment": {
+    "starcasino.nl": {
+      "registrar": "Realtime Register B.V.",
+      "registrantOrg": "StarCasino Operations B.V.",
+      "registrantCountry": "NL",
+      "domainCreated": "2018-03-14",
+      "domainExpires": "2027-03-14",
+      "nameservers": ["ns1.starcasino.nl", "ns2.starcasino.nl"],
+      "monthlyVisitorsEst": 2400000,
+      "trafficRank": 18540
+    },
+    "casino.nl": {
+      "registrar": "GoDaddy.com, LLC",
+      "registrantOrg": "REDACTED FOR PRIVACY",
+      "registrantCountry": "NL",
+      "domainCreated": "2007-11-22",
+      "domainExpires": "2026-11-22",
+      "nameservers": ["ns1.casino.nl", "ns2.casino.nl"],
+      "monthlyVisitorsEst": 580000,
+      "trafficRank": 52100
+    },
+    "onlinecasinoground.nl": {
+      "registrar": "OpenProvider",
+      "registrantOrg": "REDACTED FOR PRIVACY",
+      "registrantCountry": "NL",
+      "domainCreated": "2015-08-09",
+      "domainExpires": "2026-08-09",
+      "nameservers": ["ns1.transip.nl", "ns2.transip.nl"],
+      "monthlyVisitorsEst": 145000,
+      "trafficRank": 184320
+    },
+    "bestecasinos.nl": {
+      "registrar": "Hostnet B.V.",
+      "registrantOrg": "Bestecasinos Media B.V.",
+      "registrantCountry": "NL",
+      "domainCreated": "2019-01-15",
+      "domainExpires": "2026-01-15",
+      "nameservers": ["ns1.hostnetbv.nl", "ns2.hostnetbv.nl"],
+      "monthlyVisitorsEst": 92000,
+      "trafficRank": 248910
+    },
+    "nl.wikipedia.org": {
+      "registrar": "MarkMonitor Inc.",
+      "registrantOrg": "Wikimedia Foundation, Inc.",
+      "registrantCountry": "US",
+      "domainCreated": "2001-01-13",
+      "domainExpires": "2027-01-13",
+      "nameservers": ["ns0.wikimedia.org", "ns1.wikimedia.org", "ns2.wikimedia.org"],
+      "monthlyVisitorsEst": 1850000000,
+      "trafficRank": 13
+    },
+    "casinoz.nl": {
+      "registrar": "OpenProvider",
+      "registrantOrg": "REDACTED FOR PRIVACY",
+      "registrantCountry": "NL",
+      "domainCreated": "2020-06-30",
+      "domainExpires": "2026-06-30",
+      "nameservers": ["ns1.openprovider.nl", "ns2.openprovider.eu"],
+      "monthlyVisitorsEst": 58000,
+      "trafficRank": 412780
+    },
+    "gokken.nl": {
+      "registrar": "Realtime Register B.V.",
+      "registrantOrg": "Gokken Media Group",
+      "registrantCountry": "NL",
+      "domainCreated": "2003-04-08",
+      "domainExpires": "2026-04-08",
+      "nameservers": ["ns1.transip.nl", "ns2.transip.nl"],
+      "monthlyVisitorsEst": 310000,
+      "trafficRank": 84120
+    },
+    "casinoaffer.com": {
+      "registrar": "Namecheap, Inc.",
+      "registrantOrg": "REDACTED FOR PRIVACY",
+      "registrantCountry": "CY",
+      "domainCreated": "2021-09-04",
+      "domainExpires": "2026-09-04",
+      "nameservers": ["dns1.namecheaphosting.com", "dns2.namecheaphosting.com"],
+      "monthlyVisitorsEst": 28000,
+      "trafficRank": 891250
+    },
+    "nieuwecasinos.eu": {
+      "registrar": "EURid",
+      "registrantOrg": "REDACTED FOR PRIVACY",
+      "registrantCountry": "NL",
+      "domainCreated": "2022-02-18",
+      "domainExpires": "2026-02-18",
+      "nameservers": ["ns1.eurodns.com", "ns2.eurodns.com"],
+      "monthlyVisitorsEst": 41000,
+      "trafficRank": 521340
+    },
+    "gambling.com": {
+      "registrar": "GoDaddy.com, LLC",
+      "registrantOrg": "Gambling.com Group plc",
+      "registrantCountry": "MT",
+      "domainCreated": "1995-08-23",
+      "domainExpires": "2027-08-23",
+      "nameservers": ["ns1.gambling.com", "ns2.gambling.com"],
+      "monthlyVisitorsEst": 4200000,
+      "trafficRank": 11240
+    },
+    "tonybet.nl": {
+      "registrar": "Realtime Register B.V.",
+      "registrantOrg": "TonyBet B.V.",
+      "registrantCountry": "NL",
+      "domainCreated": "2021-09-30",
+      "domainExpires": "2027-09-30",
+      "nameservers": ["ns1.tonybet.com", "ns2.tonybet.com"],
+      "monthlyVisitorsEst": 980000,
+      "trafficRank": 32400
+    },
+    "shadyreview.nl": {
+      "registrar": "Namecheap, Inc.",
+      "registrantOrg": "REDACTED FOR PRIVACY",
+      "registrantCountry": "CY",
+      "domainCreated": "2025-11-02",
+      "domainExpires": "2026-11-02",
+      "nameservers": ["dns1.namecheaphosting.com", "dns2.namecheaphosting.com"],
+      "monthlyVisitorsEst": 4200,
+      "trafficRank": 2840000
+    }
   }
 }

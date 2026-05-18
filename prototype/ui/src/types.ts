@@ -29,6 +29,21 @@ export interface ResultRow {
   };
 }
 
+export interface DomainEnrichment {
+  domain: string;
+  registrar: string | null;
+  registrantOrg: string | null;
+  registrantCountry: string | null;
+  domainCreated: string | null;
+  domainExpires: string | null;
+  nameservers: string[];
+  monthlyVisitorsEst: number;
+  trafficRank: number;
+  source: "whois" | "fixture" | "heuristic";
+  updatedAt: string;
+  fetchError: string | null;
+}
+
 export interface SnapshotResponse {
   snapshot: {
     id: number;
@@ -38,6 +53,7 @@ export interface SnapshotResponse {
     source: "serpapi" | "playwright" | "mock";
     results: ResultRow[];
   } | null;
+  enrichment: Record<string, DomainEnrichment>;
 }
 
 export interface HistoryPoint {
