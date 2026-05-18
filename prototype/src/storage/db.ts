@@ -242,6 +242,62 @@ export function getDomainsByCategory(
   return snapshot.results.filter((r) => r.classification.category === category);
 }
 
+export interface HistoryPoint {
+  snapshotId: number;
+  takenAt: string;
+  counts: Record<Category, number>;
+}
+
+interface HistoryAggRow {
+  snapshot_id: number;
+  taken_at: string;
+  category: Category;
+  cnt: number;
+}
+
+export function getHistory(query: string, geo: string, limit = 30): HistoryPoint[] {
+  // Aggregates the last N snapshots into per-category counts for time-series
+  // charts. Uses a single SQL query for efficiency.
+  const rows = db
+    .prepare(
+      `WITH recent AS (
+         SELECT s.id, s.taken_at
+         FROM snapshots s
+         JOIN keywords k ON k.id = s.keyword_id
+         WHERE k.query = ? AND k.geo = ?
+         ORDER BY s.taken_at DESC
+         LIMIT ?
+       )
+       SELECT s.id AS snapshot_id, s.taken_at, c.category, COUNT(*) AS cnt
+       FROM recent s
+       JOIN serp_results r ON r.snapshot_id = s.id
+       JOIN classifications c ON c.result_id = r.id
+       GROUP BY s.id, c.category
+       ORDER BY s.taken_at ASC, c.category ASC`,
+    )
+    .all(query, geo, limit) as HistoryAggRow[];
+
+  const bySnapshot = new Map<number, HistoryPoint>();
+  for (const r of rows) {
+    let p = bySnapshot.get(r.snapshot_id);
+    if (!p) {
+      p = {
+        snapshotId: r.snapshot_id,
+        takenAt: r.taken_at,
+        counts: {
+          official: 0,
+          affiliate: 0,
+          competitor_brand_thief: 0,
+          unclear: 0,
+        },
+      };
+      bySnapshot.set(r.snapshot_id, p);
+    }
+    p.counts[r.category] = r.cnt;
+  }
+  return Array.from(bySnapshot.values());
+}
+
 export function getDomainHistory(domain: string, query: string, geo: string) {
   const kw = db
     .prepare("SELECT id FROM keywords WHERE query = ? AND geo = ?")

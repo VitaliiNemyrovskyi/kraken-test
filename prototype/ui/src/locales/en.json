@@ -17,6 +17,11 @@
   "distribution": {
     "title": "Distribution"
   },
+  "history": {
+    "title": "History (last {{count}} snapshots)",
+    "hint": "Each datapoint is one monitoring run. Counts per category over time.",
+    "empty": "No history yet — run `npm run monitor` to start collecting snapshots."
+  },
   "table": {
     "title": "Top-{{count}} domains",
     "hint": "Click any row to see the classifier's reasoning.",

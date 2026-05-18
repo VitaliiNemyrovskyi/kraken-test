@@ -64,6 +64,15 @@ npm run analyze             # SerpAPI → Playwright scrape → OpenRouter class
 npm run dashboard
 ```
 
+**Регулярний моніторинг** (cron + Fastify в одному процесі):
+```bash
+npm run monitor             # default: every 6 hours, real SerpAPI
+npm run monitor:demo        # demo: every 30 sec, mock fixture (no API keys)
+```
+Кожен tick запускає `analyze` → новий рядок у `snapshots`. Dashboard показує **time-series chart** (last 30 snapshots), auto-refresh кожні 10 сек. Конфіг:
+- `MONITOR_CRON` — cron expression (5 або 6 fields). Default `"0 */6 * * *"`.
+- `RUN_ON_START=false` — пропустити initial tick. Default запускає одразу.
+
 **Dev mode (Vite HMR + Fastify):**
 ```bash
 # Terminal 1 — backend
@@ -109,8 +118,9 @@ Dashboard на `http://localhost:3000` показує:
 | Method | Path | Опис |
 |---|---|---|
 | GET | `/` | Web UI (dashboard) |
-| GET | `/api/summary?query=&geo=` | Counts + percentages per category |
+| GET | `/api/summary?query=&geo=` | Counts + percentages per category (latest snapshot) |
 | GET | `/api/latest?query=&geo=` | Останній snapshot з усіма result + classification |
+| GET | `/api/history?query=&geo=&limit=30` | Time-series — last N snapshots, counts per category |
 | GET | `/api/domains/:category?query=&geo=` | Domain list per category |
 
 ---

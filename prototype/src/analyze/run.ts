@@ -1,3 +1,4 @@
+import { pathToFileURL } from "node:url";
 import { config } from "../config.js";
 import { fetchSerp } from "../serp/index.js";
 import { scrapePage, closeBrowser } from "../scraper/page-scraper.js";
@@ -5,7 +6,13 @@ import { classify } from "../classifier/index.js";
 import { saveSnapshot } from "../storage/db.js";
 import type { AnalyzedResult } from "../types.js";
 
-async function main() {
+export interface AnalyzeResult {
+  snapshotId: number;
+  counts: Record<string, number>;
+  total: number;
+}
+
+export async function runAnalyze(): Promise<AnalyzeResult> {
   const useMockFixture = config.SERP_SOURCE === "mock";
   console.log(
     `[analyze] query="${config.QUERY}" geo="${config.GEO}" source=${config.SERP_SOURCE} limit=${config.SERP_LIMIT}`,
@@ -38,7 +45,6 @@ async function main() {
   );
   console.log(`[analyze] saved snapshot #${snapshotId}`);
 
-  // Distribution summary
   const counts: Record<string, number> = {};
   for (const r of analyzed) {
     counts[r.classification.category] = (counts[r.classification.category] ?? 0) + 1;
@@ -49,10 +55,15 @@ async function main() {
     console.log(`  ${cat.padEnd(25)} ${n}/${analyzed.length}  (${pct}%)`);
   }
 
-  await closeBrowser();
+  return { snapshotId, counts, total: analyzed.length };
 }
 
-main().catch((err) => {
-  console.error("[analyze] fatal:", err);
-  process.exit(1);
-});
+// Run as standalone script
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  runAnalyze()
+    .then(() => closeBrowser())
+    .catch((err) => {
+      console.error("[analyze] fatal:", err);
+      process.exit(1);
+    });
+}

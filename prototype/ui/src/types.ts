@@ -39,3 +39,13 @@ export interface SnapshotResponse {
     results: ResultRow[];
   } | null;
 }
+
+export interface HistoryPoint {
+  snapshotId: number;
+  takenAt: string;
+  counts: CategoryCounts;
+}
+
+export interface HistoryResponse {
+  points: HistoryPoint[];
+}
