@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StarCasino SERP Monitor</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>StarCasino — Branded SERP Monitor (NL)</h1>
+        <p class="subtitle" id="meta">…</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="grid-2">
+        <div class="card">
+          <h2>Розподіл за категоріями</h2>
+          <div class="chart-wrap"><canvas id="pie"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Зведення</h2>
+          <table class="kv">
+            <tbody id="summary-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Топ-10 доменів</h2>
+        <div class="table-wrap">
+          <table id="domains-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Domain</th>
+                <th>Category</th>
+                <th>Confidence</th>
+                <th>Final → domain</th>
+                <th>Explanation</th>
+              </tr>
+            </thead>
+            <tbody id="domains-tbody">
+              <tr><td colspan="6" class="muted">Завантаження…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container">
+        <p class="muted">
+          Kraken Leads test task • Task 2 prototype • SerpAPI + Playwright + OpenRouter + SQLite
+        </p>
+      </div>
+    </footer>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

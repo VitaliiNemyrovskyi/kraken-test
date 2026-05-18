@@ -1,0 +1,211 @@
+{
+  "_comment": "Mock SERP fixture for offline demo. 10 plausible top-10 results for query 'starcasino' geo NL — includes the brand domain itself, two affiliate-style domains, three competitor-brand-thief patterns, and two ambiguous results.",
+  "query": "starcasino",
+  "geo": "Netherlands",
+  "results": [
+    {
+      "position": 1,
+      "url": "https://www.starcasino.nl/",
+      "domain": "starcasino.nl",
+      "title": "StarCasino — Officiële online casino Nederland (KSA licentie)",
+      "snippet": "Speel veilig bij StarCasino, het officiële online casino met Nederlandse KSA-licentie. Slots, blackjack, roulette en live casino spellen."
+    },
+    {
+      "position": 2,
+      "url": "https://www.casino.nl/online-casinos/starcasino-review",
+      "domain": "casino.nl",
+      "title": "StarCasino review 2026 — bonus, spellen, uitbetalingen",
+      "snippet": "Onze uitgebreide review van StarCasino. Welkomstbonus, spelaanbod, uitbetaaltijden en mobiele app. Speel via onze partnerlink met exclusieve bonus."
+    },
+    {
+      "position": 3,
+      "url": "https://onlinecasinoground.nl/starcasino/",
+      "domain": "onlinecasinoground.nl",
+      "title": "StarCasino 2026 — Recensie & Bonuscode",
+      "snippet": "Volledige StarCasino recensie. Krijg €100 welkomstbonus + 100 free spins via onze exclusieve link."
+    },
+    {
+      "position": 4,
+      "url": "https://www.bestecasinos.nl/star-casino-alternatieven",
+      "domain": "bestecasinos.nl",
+      "title": "StarCasino alternatieven — 5 beste casino's in Nederland",
+      "snippet": "Zoek je een alternatief voor StarCasino? Bekijk onze top 5 Nederlandse online casino's met betere bonussen. Speel nu bij JACKS, BetCity of Holland Casino."
+    },
+    {
+      "position": 5,
+      "url": "https://nl.wikipedia.org/wiki/StarCasino",
+      "domain": "nl.wikipedia.org",
+      "title": "StarCasino - Wikipedia",
+      "snippet": "StarCasino is een online casino dat opereert in Nederland onder een licentie van de Kansspelautoriteit. Het casino werd opgericht in..."
+    },
+    {
+      "position": 6,
+      "url": "https://www.casinoz.nl/starcasino-bonus",
+      "domain": "casinoz.nl",
+      "title": "StarCasino bonuscode 2026 — €100 welkomstbonus + Free Spins",
+      "snippet": "Vergelijk de beste casinobonussen. StarCasino bonus uitgelegd; vergelijk met Unibet (€200), Toto Casino (€150), 711 (€100)."
+    },
+    {
+      "position": 7,
+      "url": "https://gokken.nl/star-casino",
+      "domain": "gokken.nl",
+      "title": "StarCasino ervaringen 2026 — eerlijke review",
+      "snippet": "Lees onze StarCasino ervaringen. Wij testen het spelaanbod, de uitbetalingen en de klantenservice. Speel verantwoord!"
+    },
+    {
+      "position": 8,
+      "url": "https://casinoaffer.com/nl/starcasino",
+      "domain": "casinoaffer.com",
+      "title": "StarCasino — claim je €150 bonus",
+      "snippet": "Bezoek StarCasino via onze partnerlink en ontvang €150 welkomstbonus + 50 free spins op Book of Dead."
+    },
+    {
+      "position": 9,
+      "url": "https://nieuwecasinos.eu/starcasino-of-tonybet",
+      "domain": "nieuwecasinos.eu",
+      "title": "StarCasino of TonyBet? Vergelijking 2026",
+      "snippet": "We vergelijken StarCasino met TonyBet. Welke heeft de betere bonus, het grotere spelaanbod? Speel bij TonyBet voor €200 extra."
+    },
+    {
+      "position": 10,
+      "url": "https://www.gambling.com/nl/casinos/starcasino",
+      "domain": "gambling.com",
+      "title": "StarCasino Nederland — review and bonus details",
+      "snippet": "StarCasino review from Gambling.com. Licensed by KSA. Bonus, games, payment methods reviewed."
+    }
+  ],
+  "_scraped": {
+    "starcasino.nl": {
+      "title": "StarCasino — Officiële online casino Nederland (KSA licentie)",
+      "metaDescription": "Speel veilig bij StarCasino, het officiële online casino met Nederlandse KSA-licentie.",
+      "mainText": "Welkom bij StarCasino. Speel honderden slots, blackjack, roulette en live casino spellen.",
+      "outboundLinks": [
+        { "href": "https://www.starcasino.nl/registreren", "anchor": "Registreren", "isExternal": false, "domain": "starcasino.nl" },
+        { "href": "https://www.starcasino.nl/spellen", "anchor": "Spellen", "isExternal": false, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.starcasino.nl/registreren",
+      "primaryCtaTarget": "star",
+      "redirectFinalUrl": "https://www.starcasino.nl/registreren",
+      "redirectFinalDomain": "starcasino.nl"
+    },
+    "casino.nl": {
+      "title": "StarCasino review 2026",
+      "metaDescription": "Onze uitgebreide review van StarCasino met exclusieve partnerlink.",
+      "mainText": "StarCasino is een legitiem Nederlands casino. Speel via onze partnerlink en krijg €100 welkomstbonus.",
+      "outboundLinks": [
+        { "href": "https://www.starcasino.nl/?btag=cas-nl-12345", "anchor": "Speel bij StarCasino", "isExternal": true, "domain": "starcasino.nl" },
+        { "href": "https://www.starcasino.nl/bonussen?aff_id=cas-nl", "anchor": "Bonussen bekijken", "isExternal": true, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.starcasino.nl/?btag=cas-nl-12345",
+      "primaryCtaTarget": "star",
+      "redirectFinalUrl": "https://www.starcasino.nl/?btag=cas-nl-12345",
+      "redirectFinalDomain": "starcasino.nl"
+    },
+    "onlinecasinoground.nl": {
+      "title": "StarCasino 2026 — Recensie & Bonuscode",
+      "metaDescription": "Volledige StarCasino recensie met exclusieve link.",
+      "mainText": "Krijg €100 welkomstbonus + 100 free spins. StarCasino is een topkeuze in Nederland.",
+      "outboundLinks": [
+        { "href": "https://go.income-access.com/?p=starcasino-nl&ref=ocg", "anchor": "Bezoek StarCasino", "isExternal": true, "domain": "income-access.com" },
+        { "href": "https://www.starcasino.nl/?partnerid=ocg-001", "anchor": "Claim bonus", "isExternal": true, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": "https://go.income-access.com/?p=starcasino-nl&ref=ocg",
+      "primaryCtaTarget": "star",
+      "redirectFinalUrl": "https://www.starcasino.nl/welcome?btag=ocg-001",
+      "redirectFinalDomain": "starcasino.nl"
+    },
+    "bestecasinos.nl": {
+      "title": "StarCasino alternatieven — beste casino's NL",
+      "metaDescription": "Vind de beste alternatieven voor StarCasino in Nederland.",
+      "mainText": "StarCasino is een populair casino, maar er zijn betere opties. Bekijk onze top 5 alternatieven met hogere bonussen.",
+      "outboundLinks": [
+        { "href": "https://www.jacks.nl/?aff_id=bc-jck-002", "anchor": "Speel bij JACKS", "isExternal": true, "domain": "jacks.nl" },
+        { "href": "https://www.betcity.nl/welcome?btag=bc-btc-003", "anchor": "Speel bij BetCity", "isExternal": true, "domain": "betcity.nl" },
+        { "href": "https://www.hollandcasino.nl/?ref=bc-hc-004", "anchor": "Speel bij Holland Casino", "isExternal": true, "domain": "hollandcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.jacks.nl/?aff_id=bc-jck-002",
+      "primaryCtaTarget": "competitor",
+      "redirectFinalUrl": "https://www.jacks.nl/welcome?btag=bc-jck-002",
+      "redirectFinalDomain": "jacks.nl"
+    },
+    "nl.wikipedia.org": {
+      "title": "StarCasino - Wikipedia",
+      "metaDescription": "Wikipedia article about StarCasino.",
+      "mainText": "StarCasino is een online casino dat opereert in Nederland onder een licentie van de Kansspelautoriteit (KSA).",
+      "outboundLinks": [
+        { "href": "https://www.kansspelautoriteit.nl/", "anchor": "Kansspelautoriteit", "isExternal": true, "domain": "kansspelautoriteit.nl" },
+        { "href": "https://www.starcasino.nl/", "anchor": "Officiële website", "isExternal": true, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": null,
+      "primaryCtaTarget": "other",
+      "redirectFinalUrl": null,
+      "redirectFinalDomain": null
+    },
+    "casinoz.nl": {
+      "title": "StarCasino bonuscode 2026",
+      "metaDescription": "Vergelijk de beste casinobonussen.",
+      "mainText": "StarCasino biedt een welkomstbonus. Vergelijk met Unibet, Toto, 711 voor betere bonussen. Speel bij onze top 3.",
+      "outboundLinks": [
+        { "href": "https://www.unibet.nl/welcome?btag=cz-u-01", "anchor": "Unibet €200", "isExternal": true, "domain": "unibet.nl" },
+        { "href": "https://www.toto.nl/casino?aff_id=cz-t-02", "anchor": "Toto €150", "isExternal": true, "domain": "toto.nl" },
+        { "href": "https://www.711.nl/welcome?ref=cz-7-03", "anchor": "711 €100", "isExternal": true, "domain": "711.nl" },
+        { "href": "https://www.starcasino.nl/", "anchor": "StarCasino (no bonus link)", "isExternal": true, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.unibet.nl/welcome?btag=cz-u-01",
+      "primaryCtaTarget": "competitor",
+      "redirectFinalUrl": "https://www.unibet.nl/welcome?btag=cz-u-01",
+      "redirectFinalDomain": "unibet.nl"
+    },
+    "gokken.nl": {
+      "title": "StarCasino ervaringen 2026",
+      "metaDescription": "Lees onze eerlijke StarCasino ervaringen.",
+      "mainText": "Onze ervaring met StarCasino is overwegend positief. Het spelaanbod is goed, de uitbetalingen zijn snel.",
+      "outboundLinks": [
+        { "href": "https://www.starcasino.nl/?btag=gokken-nl", "anchor": "Bezoek StarCasino", "isExternal": true, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.starcasino.nl/?btag=gokken-nl",
+      "primaryCtaTarget": "star",
+      "redirectFinalUrl": "https://www.starcasino.nl/?btag=gokken-nl",
+      "redirectFinalDomain": "starcasino.nl"
+    },
+    "casinoaffer.com": {
+      "title": "StarCasino — claim je €150 bonus",
+      "metaDescription": "Claim €150 bonus via onze partnerlink.",
+      "mainText": "Bezoek StarCasino via onze partnerlink en ontvang €150 welkomstbonus.",
+      "outboundLinks": [
+        { "href": "https://track.casinoaffer.com/?p=starcasino-nl&clickid=ca-99", "anchor": "Claim €150", "isExternal": true, "domain": "casinoaffer.com" }
+      ],
+      "primaryCtaHref": "https://track.casinoaffer.com/?p=starcasino-nl&clickid=ca-99",
+      "primaryCtaTarget": "star",
+      "redirectFinalUrl": "https://www.starcasino.nl/promo?btag=ca-99",
+      "redirectFinalDomain": "starcasino.nl"
+    },
+    "nieuwecasinos.eu": {
+      "title": "StarCasino of TonyBet — vergelijking",
+      "metaDescription": "We vergelijken StarCasino met TonyBet.",
+      "mainText": "TonyBet biedt een grotere welkomstbonus van €200. StarCasino heeft een goed spelaanbod maar de bonus is kleiner.",
+      "outboundLinks": [
+        { "href": "https://www.tonybet.nl/welcome?aff_id=ne-tb-555", "anchor": "Speel bij TonyBet (€200)", "isExternal": true, "domain": "tonybet.nl" },
+        { "href": "https://www.starcasino.nl/", "anchor": "Bezoek StarCasino", "isExternal": true, "domain": "starcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.tonybet.nl/welcome?aff_id=ne-tb-555",
+      "primaryCtaTarget": "competitor",
+      "redirectFinalUrl": "https://www.tonybet.nl/welcome?aff_id=ne-tb-555",
+      "redirectFinalDomain": "tonybet.nl"
+    },
+    "gambling.com": {
+      "title": "StarCasino Nederland review",
+      "metaDescription": "StarCasino review from Gambling.com.",
+      "mainText": "StarCasino is a regulated Dutch casino. Review covers bonus, games, payments. Comparison to other licensed NL operators.",
+      "outboundLinks": [
+        { "href": "https://www.starcasino.nl/", "anchor": "Visit StarCasino", "isExternal": true, "domain": "starcasino.nl" },
+        { "href": "https://www.unibet.nl/", "anchor": "Unibet review", "isExternal": true, "domain": "unibet.nl" },
+        { "href": "https://www.hollandcasino.nl/", "anchor": "Holland Casino review", "isExternal": true, "domain": "hollandcasino.nl" }
+      ],
+      "primaryCtaHref": "https://www.starcasino.nl/",
+      "primaryCtaTarget": "star",
+      "redirectFinalUrl": "https://www.starcasino.nl/",
+      "redirectFinalDomain": "starcasino.nl"
+    }
+  }
+}

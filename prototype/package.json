@@ -1,0 +1,36 @@
+{
+  "name": "kraken-starcasino-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Task 2 prototype: branded SERP monitor for StarCasino (NL). Fetches top-10 Google SERP, classifies domains into official/affiliate/competitor_brand_thief/unclear, persists snapshots to SQLite, serves a dashboard.",
+  "type": "module",
+  "scripts": {
+    "analyze": "tsx src/analyze/run.ts",
+    "analyze:mock": "SERP_SOURCE=mock CLASSIFIER_LLM_ENABLED=false tsx src/analyze/run.ts",
+    "dashboard": "tsx src/dashboard/server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/static": "^7.0.0",
+    "better-sqlite3": "^11.3.0",
+    "cheerio": "^1.0.0",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.0",
+    "fastify": "^4.28.0",
+    "nanoid": "^5.0.7",
+    "openai": "^4.67.0",
+    "playwright": "^1.48.0",
+    "serpapi": "^2.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
