@@ -73,5 +73,11 @@
     "switch_to": "Switch to {{language}}",
     "en": "English",
     "uk": "Ukrainian"
+  },
+  "settings": {
+    "button": "Settings",
+    "open": "Open settings",
+    "title": "Settings",
+    "description": "Configure the monitoring scheduler. Defaults to every 6 hours (production-realistic, fits SerpAPI free tier)."
   }
 }

@@ -20,6 +20,10 @@ const schema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   HOST: z.string().default("127.0.0.1"),
   DATABASE_PATH: z.string().default("./data/starcasino.db"),
+  // Scheduler defaults. MONITOR_CRON="off" disables auto-start.
+  // "0 */6 * * *" = every 6h ≈ 120 runs/month (fits SerpAPI free tier for 1 query).
+  MONITOR_CRON: z.string().default("0 */6 * * *"),
+  RUN_ON_START: z.coerce.boolean().default(true),
 });
 
 export const config = schema.parse(process.env);

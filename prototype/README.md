@@ -64,20 +64,23 @@ npm run analyze             # SerpAPI → Playwright scrape → OpenRouter class
 npm run dashboard
 ```
 
-**Регулярний моніторинг** (cron + Fastify в одному процесі):
+**Регулярний моніторинг — авто-старт у `npm run dashboard`:**
 ```bash
-npm run monitor             # default: every 6 hours, real SerpAPI
-npm run monitor:demo        # demo: every 30 sec, mock fixture (no API keys)
+npm run dashboard           # вже включає scheduler з default cron "0 */6 * * *"
 ```
-Кожен tick запускає `analyze` → новий рядок у `snapshots`. Dashboard показує **time-series chart** (last 30 snapshots) + **інтерактивні monitoring controls**, auto-refresh кожні 3-10 сек. Конфіг env:
-- `MONITOR_CRON` — cron expression (5 або 6 fields). Default `"0 */6 * * *"`.
-- `RUN_ON_START=false` — пропустити initial tick. Default запускає одразу.
+Кожен tick запускає `analyze` → новий рядок у `snapshots`. Dashboard показує **time-series chart** (last 30 snapshots) + auto-refresh кожні 3-10 сек. Default обрано так, щоб **поміститись у SerpAPI free tier** (120 запитів/міс для одного query) і бути production-realistic для брендованої видачі.
 
-**Інтерактивне керування з UI** (працює і в `dashboard`, і в `monitor` режимі):
-- **Run Now** — натиснути кнопку → миттєвий one-off `analyze` (без чекання cron)
-- **Interval pills** — клік на `30 сек / 1 хв / 5 хв / 15 хв / 1 год / 6 год / Щодня` → стартує scheduler з відповідним cron
+**Налаштування через UI (Settings drawer):**
+Натисніть **Settings** іконку у хедері → відкриється правий drawer з:
+- **Run Now** — миттєвий one-off `analyze` (без чекання cron)
+- **Interval pills:** `30 сек / 1 хв / 5 хв / 15 хв / 1 год / 6 год / Щодня` → змінює scheduler runtime
 - **Stop** — зупинити scheduler (попередні snapshots залишаються)
-- Status показує: active/stopped, current cron, last run timestamp, duration, busy state, last error
+- **Status:** active/stopped, current cron, last run timestamp, duration, busy state, last error
+
+**Env override:**
+- `MONITOR_CRON="*/30 * * * * *"` — будь-який валідний cron (6 fields = з секундами)
+- `MONITOR_CRON=off` — вимкнути auto-start (UI може запустити вручну)
+- `RUN_ON_START=false` — не запускати initial tick
 
 **Dev mode (Vite HMR + Fastify):**
 ```bash

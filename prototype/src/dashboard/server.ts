@@ -104,6 +104,23 @@ export async function startServer(): Promise<FastifyInstance> {
   console.log(
     `\n  Dashboard at http://${config.HOST}:${config.PORT}\n  Query: "${config.QUERY}" / geo: ${config.GEO}\n`,
   );
+
+  // Auto-start the scheduler with the configured cron unless MONITOR_CRON="off".
+  // This makes `npm run dashboard` a single-command experience: monitor runs
+  // automatically at the production-sensible default (every 6 hours).
+  if (config.MONITOR_CRON.toLowerCase() !== "off") {
+    const result = scheduler.start(config.MONITOR_CRON);
+    if (!result.ok) {
+      console.error(
+        `[server] invalid MONITOR_CRON: "${config.MONITOR_CRON}" (${result.error}) — scheduler not started`,
+      );
+    } else if (config.RUN_ON_START) {
+      setTimeout(() => void scheduler.tick("on-start"), 500);
+    }
+  } else {
+    console.log("[server] MONITOR_CRON=off — scheduler disabled (use UI to start)");
+  }
+
   return app;
 }
 

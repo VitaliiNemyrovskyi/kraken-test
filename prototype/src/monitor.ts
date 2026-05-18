@@ -1,21 +1,11 @@
-import { scheduler } from "./scheduler.js";
+// Legacy alias — same as `npm run dashboard` since v0.3.
+// Kept for backwards compatibility with documentation; the dashboard
+// server now auto-starts the scheduler from MONITOR_CRON env.
 import { startServer } from "./dashboard/server.js";
 import { closeBrowser } from "./scraper/page-scraper.js";
-
-const SCHEDULE = process.env.MONITOR_CRON ?? "0 */6 * * *";
-const RUN_ON_START = process.env.RUN_ON_START !== "false";
+import { scheduler } from "./scheduler.js";
 
 await startServer();
-
-const { ok, error } = scheduler.start(SCHEDULE);
-if (!ok) {
-  console.error(`[monitor] invalid MONITOR_CRON: "${SCHEDULE}" (${error})`);
-  process.exit(1);
-}
-
-if (RUN_ON_START) {
-  setTimeout(() => void scheduler.tick("on-start"), 500);
-}
 
 const shutdown = async () => {
   console.log("\n[monitor] shutting down…");
