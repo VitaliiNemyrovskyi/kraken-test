@@ -25,3 +25,13 @@ Created EN mirror of task-2-answer.md (sequential reply to 10 PDF Task 2 questio
 domain-classification, affiliate-detection, competitor-thief-detection, classifier-scoring. Plus entities/
 starcasino-nl. Forward refs to ADRs, nl-competitor-casinos, openrouter, comparisons remain as expected
 "compounding wiki" pattern.
+
+## [2026-05-18] create | concepts/scaling-bottlenecks (EN mirror)
+Mirror of UA scaling-bottlenecks concept. Detailed answer to PDF Task 1 question about scaling to 1000+ sites/month
+— 8 bottlenecks ranked by severity, mitigations, cost model ($0.24-0.30/page at 50k pages/mo), 5-phase build plan.
+
+## [2026-05-18] delete | remove intake/ (out of PDF scope)
+Task 1 is theoretical-only per PDF brief. The intake/ Node.js prototype was removed (`git rm -r`). Wiki concepts
+(google-sheets-intake, web-ui-intake, task-queue) rewritten as concept-only design (EN mirror updated). Task 1
+architecture diagram regenerated. README and architecture-overview updated. prototype/ folder remains for the
+upcoming Task 2 implementation.

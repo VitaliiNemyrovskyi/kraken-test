@@ -17,13 +17,14 @@ Layer that automatically pulls SEO tasks from a Google Sheet into the internal q
 ## Why it matters
 Direct requirement from the PDF ([[sources/kraken-leads-test-task]]): "the system must receive tasks from Google Sheets or an analogous web interface". Sheets is the cheapest production-grade UI for a content team: zero onboarding, ubiquitous skill, bulk import for free.
 
-## How we use it (demo prototype)
-Implemented in [`intake/`](../../intake/):
+## How it would work (proposed design)
 
-1. **OAuth 2.0** with access_type=offline; refresh token stored in SQLite (survives restart) — `intake/src/sheets/oauth.ts`.
-2. **Schema contract:** row 1 of the sheet = headers `id | keyword | geo | language | brand | content_type | status | output_url`. Validated in `intake/src/sheets/client.ts:HEADERS`.
-3. **Polling worker:** every `POLL_INTERVAL_SECONDS` (default 60s) reads the entire range; for each new `id` inserts a task via `taskRepo.insert` (idempotency via `UNIQUE(source, sheet_row_id)`).
-4. **Writeback:** when status changes via [[task-queue|status simulator]], if `task.source = 'sheet'`, the `status` and `output_url` columns are updated through `spreadsheets.values.update`.
+1. **OAuth 2.0** with access_type=offline; refresh token persisted in the DB (survives restart). Alternative — Google Service Account, simpler for server-only flows but requires share-with-email for every Sheet.
+2. **Schema contract:** row 1 of the sheet = headers `id | keyword | geo | language | brand | content_type | status | output_url`. Validated on boot; without correct headers the poller fail-fasts with a clear error.
+3. **Polling worker:** every `POLL_INTERVAL_SECONDS` (default 60s) reads the entire range; for each new `id` inserts a task into the internal queue (idempotency via `UNIQUE(source, sheet_row_id)` in the DB).
+4. **Writeback:** when the pipeline advances status (`scraping → generating → publishing → published`), if the task's source is a Sheet, we update `status` and `output_url` columns via `spreadsheets.values.update`.
+
+*This concept is **not implemented** in this repository — Task 1 is the theoretical part per the PDF brief. The design is captured here for the phase plan and for reference in [[../synthesis/architecture-overview]].*
 
 ## Tradeoffs
 
@@ -44,4 +45,3 @@ Implemented in [`intake/`](../../intake/):
 
 ## Sources
 - [[../sources/kraken-leads-test-task]] — PDF question 1
-- Implementation: `intake/src/sheets/{oauth,client,poller}.ts`

@@ -1,8 +1,8 @@
 ---
 title: Unified task queue
 category: concept
-summary: Єдина SQLite-таблиця-черга, що зливає задачі з усіх intake джерел; state machine + status writeback per source
-tags: [task1, queue, sqlite, state-machine]
+summary: Єдина персистентна черга, що зливає задачі з усіх intake джерел; state machine + status writeback per source
+tags: [task1, queue, state-machine]
 sources: 1
 updated: 2026-05-18
 lang: ua
@@ -17,31 +17,31 @@ mirror: ../../wiki-en/concepts/task-queue.md
 ## Why it matters
 Без єдиної черги downstream-pipeline (scraping, LLM gen, deploy) має знати про два різні джерела. З нею — pipeline бачить однорідний `Task` об'єкт, бізнес-логіка не дублюється. Це класичний adapter pattern: intake-шар нормалізує input, queue — це internal data model.
 
-## How we use it (demo прототип)
-Реалізовано у `intake/src/storage/`:
+## How it would work (proposed design)
 
-**SQLite table** (`schema.sql`):
+**Table schema** (Postgres у production, SQLite у dev):
 ```sql
 CREATE TABLE tasks (
   id TEXT PRIMARY KEY,
   source TEXT CHECK(source IN ('web','sheet')),
   sheet_row_id TEXT,                    -- NULL для web; sheet row id для sheet
   keyword, geo, language, brand, content_type TEXT,
-  status TEXT CHECK(status IN ('queued','scraping',...,'published','failed')),
+  status TEXT CHECK(status IN ('queued','scraping','generating','reviewing','publishing','published','failed')),
   output_url TEXT,
   created_at, status_updated_at TEXT,
   UNIQUE(source, sheet_row_id)          -- idempotency для poller
 );
 ```
 
-**State machine** (`intake/src/types.ts:TASK_STATUS_FLOW` + `intake/src/status/simulator.ts`):
-- Лінійна прогресія через 6 станів
+**State machine:**
+- Лінійна прогресія через 6 станів (`queued → scraping → generating → reviewing → publishing → published`) або термінальний `failed`
 - `advanceTask(id)` робить step+1
-- `failTask(id)` → термінальний `failed`
-- При досягненні `published` генерується fake `output_url` (демо)
-- Якщо `source='sheet'` → автоматичний `syncBackToSheet` через `spreadsheets.values.update`
+- При досягненні `published` записується `output_url` (deployed page URL)
+- Якщо `source='sheet'` → автоматичний writeback у Sheet через `spreadsheets.values.update`
 
-**Idempotency:** `UNIQUE(source, sheet_row_id)` constraint означає, що `poller.pollOnce()` може запускатись довільну кількість разів — нові рядки додасть, існуючі пропустить.
+**Idempotency:** `UNIQUE(source, sheet_row_id)` constraint означає, що sheet poller може запускатись довільну кількість разів — нові рядки додасть, існуючі пропустить.
+
+*Цей концепт **не імплементовано** в репозиторії — Task 1 є теоретичною частиною за вимогами PDF.*
 
 ## Tradeoffs
 
@@ -56,4 +56,3 @@ CREATE TABLE tasks (
 
 ## Sources
 - [[../sources/kraken-leads-test-task]] — питання 8 PDF ("оновлення статусу")
-- Реалізація: `intake/src/storage/{schema.sql,db.ts}`, `intake/src/status/simulator.ts`

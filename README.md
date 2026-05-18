@@ -5,18 +5,18 @@
 
 Дві задачі в одному репозиторії:
 
-- **Task 1** — концепція повністю автоматизованої системи генерації SEO-сайтів (Google Sheets → SERP → AI content → Cloudflare Pages), з частковим **робочим прототипом intake-шару**.
-- **Task 2** — концепція моніторингу брендованої видачі StarCasino (NL) з автоматичною класифікацією доменів на 3 категорії, плюс **робочий прототип** (у плані).
+- **Task 1** — концепція повністю автоматизованої системи генерації SEO-сайтів (Google Sheets → SERP → AI content → Cloudflare Pages). Згідно PDF — лише **теоретична частина**.
+- **Task 2** — концепція моніторингу брендованої видачі StarCasino (NL) з автоматичною класифікацією доменів на 3 категорії, **плюс робочий прототип** (вимога PDF, у плані: [`prototype/`](prototype/)).
 
 ---
 
 ## 🗺️ Архітектура
 
-### Task 1 — SEO Automation System
+### Task 1 — SEO Automation System (theoretical)
 
 ![Task 1 — SEO Automation Architecture](wiki/assets/diagrams/task-1-architecture.svg)
 
-### Task 2 — Branded SERP Monitor (StarCasino NL)
+### Task 2 — Branded SERP Monitor (StarCasino NL) — theoretical + prototype
 
 ![Task 2 — Branded SERP Monitor](wiki/assets/diagrams/task-2-architecture.svg)
 
@@ -39,9 +39,9 @@
 | 1 | [`README.md`](README.md) (цей файл) | Огляд + діаграми |
 | 2 | [`CLAUDE.md`](CLAUDE.md) | Методологія, iron rules, skills matrix |
 | 3 | [`wiki/synthesis/architecture-overview.md`](wiki/synthesis/architecture-overview.md) | Архітектура з посиланнями на atomic concepts |
-| 4 | [`wiki/sources/kraken-leads-test-task.md`](wiki/sources/kraken-leads-test-task.md) | TL;DR оригінального завдання |
+| 4 | [`wiki/synthesis/task-2-answer.md`](wiki/synthesis/task-2-answer.md) | Sequential відповідь на 10 PDF-питань Task 2 |
 | 5 | [`wiki/concepts/`](wiki/concepts/) | Atomic concept pages (по одній на під-питання PDF) |
-| 6 | [`intake/`](intake/) | Робочий прототип intake-шару |
+| 6 | [`prototype/`](prototype/) | Робочий прототип Task 2 (у плані) |
 
 ### Структура репозиторію
 
@@ -53,23 +53,25 @@ kraken-test/
 ├── wiki/                        ← UA wiki (primary)
 │   ├── index.md, log.md
 │   ├── entities/  concepts/  sources/  comparisons/  synthesis/
-│   └── assets/diagrams/         ← PNG/SVG/Mermaid sources
+│   └── assets/diagrams/         ← SVG/Mermaid sources
 ├── wiki-en/                     ← EN mirror
-└── intake/                      ← Робочий прототип Task 1 intake (Node.js + Fastify + OAuth)
+└── prototype/                   ← Робочий прототип Task 2 (StarCasino monitor, у плані)
 ```
 
 ---
 
-## 🚀 Quick start — Intake demo
+## 🚀 Quick start — Task 2 prototype
 
 ```bash
-cd intake
-cp .env.example .env       # (опціонально) додати Google OAuth credentials
-npm install
-npm run dev                # → http://localhost:3001
+# (Coming soon — у плані)
+cd prototype
+cp .env.example .env       # SERPAPI_KEY, OPENROUTER_API_KEY
+npm install && npx playwright install chromium
+npm run analyze            # один реальний run для top-10 NL "starcasino"
+npm run dashboard          # http://localhost:3000
 ```
 
-Без Google credentials веб-форма все одно працює. Деталі: [`intake/README.md`](intake/README.md).
+Без API-ключів буде доступний `npm run analyze:mock` на fixture-даних.
 
 ---
 
@@ -77,28 +79,29 @@ npm run dev                # → http://localhost:3001
 
 - **Документація:** [`llm-wiki@claude-code-skills`](https://github.com/anthropics/claude-code-skills) (Karpathy method) + paralleled UA/EN trees
 - **Code quality:** [`karpathy-coder@claude-code-skills`](https://github.com/anthropics/claude-code-skills) (4 principles)
-- **Діаграми:** Mermaid → PNG/SVG через [mermaid.ink](https://mermaid.ink/)
-- **Tech stack:** Node.js 20 + TypeScript 5 strict + Fastify + SQLite + Google OAuth 2.0 + OpenRouter (LLM gateway)
+- **Діаграми:** Mermaid → SVG через [mermaid.ink](https://mermaid.ink/)
+- **Task 2 prototype stack:** Node.js 20 + TypeScript 5 strict + Fastify + Playwright + SQLite + OpenRouter (LLM gateway) + SerpAPI
 
 ---
 
 ## 📦 Deliverables checklist
 
 - [x] Karpathy LLM-Wiki vault (UA + EN mirror, schema, templates, index, log)
-- [x] Source-summary `wiki/sources/kraken-leads-test-task.md`
-- [x] Architecture overview з 3 діаграмами (PNG + SVG + Mermaid source)
-- [x] Atomic concept pages (intake): `google-sheets-intake`, `web-ui-intake`, `task-queue`
-- [x] **Робочий intake-сервіс** з обома джерелами (Sheets OAuth + Web UI) + status simulator
-- [ ] Решта concept/entity/comparison сторінок Task 1 (в плані)
-- [ ] Concept-сторінки Task 2 + classifier ADRs (в плані)
-- [ ] `synthesis/task-1-answer.md` та `task-2-answer.md` — sequential відповіді на PDF (в плані)
-- [ ] Робочий прототип Task 2 (StarCasino monitor — у плані: [`/plans/...`](/Users/Nemyrovskyi/.claude/plans/users-nemyrovskyi-projects-kraken-test-lovely-hoare.md))
+- [x] Source-summary [`wiki/sources/kraken-leads-test-task.md`](wiki/sources/kraken-leads-test-task.md)
+- [x] Architecture overview з 3 SVG-діаграмами
+- [x] Atomic concept pages (Task 1 intake): `google-sheets-intake`, `web-ui-intake`, `task-queue`
+- [x] Atomic concept pages (Task 2): `domain-classification`, `affiliate-detection`, `competitor-thief-detection`, `classifier-scoring`, `scaling-bottlenecks`
+- [x] Entity: [`starcasino-nl`](wiki/entities/starcasino-nl.md)
+- [x] Synthesis: [`task-2-answer.md`](wiki/synthesis/task-2-answer.md) — primary deliverable view
+- [ ] Synthesis: `task-1-answer.md` — sequential відповіді на Task 1 PDF (у плані)
+- [ ] **Робочий прототип Task 2** (StarCasino monitor — у плані)
+- [ ] Решта concepts/entities/ADRs Task 1 (forward refs у плані)
 
 ---
 
 ## 🇺🇸 English
 
-Same repository, both languages. EN documentation mirrors the UA primary tree under `wiki-en/`. Read the architecture overview at [`wiki-en/synthesis/architecture-overview.md`](wiki-en/synthesis/architecture-overview.md). The prototype README under `intake/README.md` is bilingual where it matters. Code comments and identifiers are English-only.
+Same repository, both languages. EN documentation mirrors the UA primary tree under `wiki-en/`. Read the architecture overview at [`wiki-en/synthesis/architecture-overview.md`](wiki-en/synthesis/architecture-overview.md). Per the PDF brief, Task 1 is purely theoretical; only Task 2 requires a working prototype.
 
 ---
 

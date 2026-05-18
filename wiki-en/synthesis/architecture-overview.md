@@ -12,7 +12,7 @@ mirror: ../../wiki/synthesis/architecture-overview.md
 # Architecture overview
 
 ## TL;DR
-The project has three independent but semantically connected layers: (1) **Task 1** — concept and partial PoC of an SEO-site generation system (intake → queue → pipeline → publish); (2) **Task 2** — full prototype of branded SERP monitoring with a classifier; (3) **documentation** — a Karpathy LLM-Wiki with atomic pages in UA+EN. Currently implemented: Task 1 intake layer + Task 2 prototype (planned).
+The project has three independent but semantically connected layers: (1) **Task 1** — concept of an SEO-site generation system (intake → queue → pipeline → publish) — per the PDF this is the theoretical part only; (2) **Task 2** — concept + working prototype of branded SERP monitoring with a classifier; (3) **documentation** — a Karpathy LLM-Wiki with atomic pages in UA+EN. Currently shipped: the full wiki + 12 atomic concepts; Task 2 prototype is planned.
 
 ---
 
@@ -27,17 +27,17 @@ The project has three independent but semantically connected layers: (1) **Task 
 
 ```mermaid
 flowchart LR
-    subgraph SOURCES["Task intake (implemented in intake/)"]
+    subgraph SOURCES["Task intake (concept)"]
       direction TB
       S1["📊 Google Sheets<br/><i>OAuth 2.0 + 60s polling</i>"]
-      S2["📝 Web Form UI<br/><i>Fastify + Vanilla JS</i>"]
+      S2["📝 Web Form UI<br/><i>HTTP form + REST</i>"]
     end
 
-    I["Intake Service<br/>(intake/src/sheets, web)"]
-    Q[("Unified Task Queue<br/>SQLite + state machine")]
-    SIM["Status Simulator<br/>(queued → … → published)"]
+    I["Intake Service<br/><i>OAuth + polling worker</i>"]
+    Q[("Unified Task Queue<br/>state machine + idempotency")]
+    SIM["Status Tracker<br/>(queued → … → published)"]
 
-    subgraph PIPE["Pipeline (concept, not implemented)"]
+    subgraph PIPE["Pipeline (concept)"]
       direction LR
       P1["SERP Analysis<br/><i>SerpAPI / DataForSEO</i>"]
       P2["Competitor Scraping<br/><i>Playwright + Readability</i>"]

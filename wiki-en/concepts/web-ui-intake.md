@@ -22,14 +22,15 @@ Sheets are great for batch loading ("a hundred keywords per quarter") but inconv
 
 The UI offers an immediate path-to-task without the spreadsheet context. The user picks the source — directly fulfilling the PDF's "web interface analogue" as a peer alternative.
 
-## How we use it (demo prototype)
-Implemented in `intake/src/web/`:
+## How it would work (proposed design)
 
-- `routes.ts:POST /api/tasks` — accepts JSON, validates with `zod` (whitelist on `contentType`), inserts `source='web'`, `sheet_row_id=NULL`.
-- `public/index.html` — form + live table of all tasks from both sources (auto-refresh every 5s).
+- `POST /api/tasks` — accepts JSON, validates with `zod` (whitelist on `contentType`), inserts a queue row with `source='web'`, `sheet_row_id=NULL`.
+- HTML form + live table of all tasks from both sources (auto-refresh).
 - Web-tasks have **no** sheet writeback (no sheet row exists); they live only in the UI.
 
-Same state machine (`queued → ... → published`) as sheet-tasks — see [[task-queue|status simulator]].
+Same state machine (`queued → ... → published`) as sheet-tasks (see [[task-queue]]).
+
+*This concept is **not implemented** in this repository — Task 1 is the theoretical part per the PDF brief.*
 
 ## Tradeoffs
 
@@ -45,4 +46,3 @@ Same state machine (`queued → ... → published`) as sheet-tasks — see [[tas
 
 ## Sources
 - [[../sources/kraken-leads-test-task]] — PDF question 1
-- Implementation: `intake/src/web/{routes.ts,public/}`

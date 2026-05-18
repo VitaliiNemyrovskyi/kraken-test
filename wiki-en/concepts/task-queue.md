@@ -1,8 +1,8 @@
 ---
 title: Unified task queue
 category: concept
-summary: A single SQLite queue table that merges tasks from all intake sources; state machine + per-source status writeback
-tags: [task1, queue, sqlite, state-machine]
+summary: A single persistent queue that merges tasks from all intake sources; state machine + per-source status writeback
+tags: [task1, queue, state-machine]
 sources: 1
 updated: 2026-05-18
 lang: en
@@ -17,31 +17,31 @@ Shared persistent task queue that ingests records from both [[google-sheets-inta
 ## Why it matters
 Without a unified queue the downstream pipeline (scraping, LLM gen, deploy) would need to know about two different sources. With it — the pipeline sees a uniform `Task` object, business logic is not duplicated. This is the classic adapter pattern: intake normalizes inputs, queue is the internal data model.
 
-## How we use it (demo prototype)
-Implemented in `intake/src/storage/`:
+## How it would work (proposed design)
 
-**SQLite table** (`schema.sql`):
+**Table schema** (Postgres in production, SQLite in dev):
 ```sql
 CREATE TABLE tasks (
   id TEXT PRIMARY KEY,
   source TEXT CHECK(source IN ('web','sheet')),
   sheet_row_id TEXT,                    -- NULL for web; sheet row id for sheet
   keyword, geo, language, brand, content_type TEXT,
-  status TEXT CHECK(status IN ('queued','scraping',...,'published','failed')),
+  status TEXT CHECK(status IN ('queued','scraping','generating','reviewing','publishing','published','failed')),
   output_url TEXT,
   created_at, status_updated_at TEXT,
   UNIQUE(source, sheet_row_id)          -- poller idempotency
 );
 ```
 
-**State machine** (`intake/src/types.ts:TASK_STATUS_FLOW` + `intake/src/status/simulator.ts`):
-- Linear progression through 6 states
+**State machine:**
+- Linear progression through 6 states (`queued → scraping → generating → reviewing → publishing → published`) or terminal `failed`
 - `advanceTask(id)` does step+1
-- `failTask(id)` → terminal `failed`
-- On reaching `published`, a fake `output_url` is generated (demo)
-- If `source='sheet'` → automatic `syncBackToSheet` via `spreadsheets.values.update`
+- On reaching `published`, `output_url` is recorded (deployed page URL)
+- If `source='sheet'` → automatic writeback to the Sheet via `spreadsheets.values.update`
 
-**Idempotency:** the `UNIQUE(source, sheet_row_id)` constraint means `poller.pollOnce()` can run arbitrarily many times — new rows get inserted, existing ones are skipped.
+**Idempotency:** the `UNIQUE(source, sheet_row_id)` constraint means the sheet poller can run arbitrarily many times — new rows get inserted, existing ones are skipped.
+
+*This concept is **not implemented** in this repository — Task 1 is the theoretical part per the PDF brief.*
 
 ## Tradeoffs
 
@@ -56,4 +56,3 @@ CREATE TABLE tasks (
 
 ## Sources
 - [[../sources/kraken-leads-test-task]] — PDF question 8 ("status updates")
-- Implementation: `intake/src/storage/{schema.sql,db.ts}`, `intake/src/status/simulator.ts`

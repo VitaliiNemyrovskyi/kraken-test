@@ -29,3 +29,11 @@ Removed PNG files (raster, blurry on zoom). Replaced image links in README, wiki
 ## [2026-05-18] create | task-2-answer synthesis + 4 concepts + 1 entity (UA+EN)
 
 Created wiki/synthesis/task-2-answer.md as primary deliverable view (10 PDF sub-questions answered with [[wikilinks]]). Added concepts/{domain-classification, affiliate-detection, competitor-thief-detection, classifier-scoring}.md and entities/starcasino-nl.md. EN mirrors for all. Forward refs to ADRs and other concepts remain as expected for compounding wiki.
+
+## [2026-05-18] create | concepts/scaling-bottlenecks (UA+EN)
+
+Detailed answer to PDF Task 1 question 'how to scale to 1000+ sites/month' — 8 bottlenecks ranked by severity, mitigations, cost model ($0.24-0.30/page at 50k pages/mo), 5-phase build plan with team/duration/cost estimates.
+
+## [2026-05-18] delete | remove intake/ (out of PDF scope)
+
+Task 1 is theoretical-only per PDF brief. intake/ Node.js prototype removed via git rm. Wiki concepts (google-sheets-intake, web-ui-intake, task-queue) rewritten as concept-only design (UA+EN). Task 1 architecture diagram regenerated. README and architecture-overview updated. prototype/ folder remains for upcoming Task 2 implementation.

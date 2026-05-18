@@ -17,13 +17,14 @@ mirror: ../../wiki-en/concepts/google-sheets-intake.md
 ## Why it matters
 Реальне завдання PDF ([[sources/kraken-leads-test-task]]): "система повинна отримувати задачі з Google Sheets або вебінтерфейс аналог". Sheet — найдешевший production-grade UI для контент-команди: zero onboarding, всі вже вміють, масовий bulk import готовий з коробки.
 
-## How we use it (demo прототип)
-Реалізовано у [`intake/`](../../intake/) сервісі:
+## How it would work (proposed design)
 
-1. **OAuth 2.0** з access_type=offline (refresh token зберігається у SQLite, переживає рестарт) — див. `intake/src/sheets/oauth.ts`.
-2. **Schema контракт:** перший рядок Sheet = headers `id | keyword | geo | language | brand | content_type | status | output_url`. Валідація на `intake/src/sheets/client.ts:HEADERS`.
-3. **Polling worker:** кожні `POLL_INTERVAL_SECONDS` (default 60s) читає весь range, для кожного нового `id` створює задачу через `taskRepo.insert` (idempotency через `UNIQUE(source, sheet_row_id)` constraint).
-4. **Writeback:** при зміні статусу через [[task-queue|status simulator]], якщо `task.source = 'sheet'`, оновлюємо колонки `status` та `output_url` через `spreadsheets.values.update`.
+1. **OAuth 2.0** з access_type=offline (refresh token зберігається у БД, переживає рестарт). Альтернатива — Google Service Account, простіший для server-only сценаріїв але потребує share-with-email кожного Sheet.
+2. **Schema контракт:** перший рядок Sheet = headers `id | keyword | geo | language | brand | content_type | status | output_url`. Валідація на boot — без коректних заголовків polling fail-fast'иться з clear error.
+3. **Polling worker:** кожні `POLL_INTERVAL_SECONDS` (default 60s) читає весь range; для кожного нового `id` створює задачу у внутрішній черзі (idempotency через `UNIQUE(source, sheet_row_id)` constraint у БД).
+4. **Writeback:** при зміні статусу у pipeline (`scraping → generating → publishing → published`), якщо джерело задачі — Sheet, оновлюємо колонки `status` та `output_url` через `spreadsheets.values.update`.
+
+*Цей концепт **не імплементовано** в репозиторії — Task 1 є теоретичною частиною за вимогами PDF. Дизайн зафіксовано для phase plan і референсу в [[../synthesis/architecture-overview]].*
 
 ## Tradeoffs
 
@@ -44,4 +45,3 @@ mirror: ../../wiki-en/concepts/google-sheets-intake.md
 
 ## Sources
 - [[../sources/kraken-leads-test-task]] — питання 1 PDF
-- Реалізація: `intake/src/sheets/{oauth,client,poller}.ts`

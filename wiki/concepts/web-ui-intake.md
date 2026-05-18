@@ -22,14 +22,15 @@ Sheets чудові для пакетного завантаження ("сто 
 
 UI дає миттєвий path-to-task без табличного контексту. Користувач сам обирає джерело — теза з PDF: "вебінтерфейс аналог" як рівноправна альтернатива.
 
-## How we use it (demo прототип)
-Реалізовано у `intake/src/web/`:
+## How it would work (proposed design)
 
-- `routes.ts:POST /api/tasks` — приймає JSON, валідує через `zod` (whitelist `contentType`), вставляє `source='web'`, `sheet_row_id=NULL`.
-- `public/index.html` — форма + жива таблиця всіх задач з обох джерел (live refresh 5s).
+- `POST /api/tasks` — приймає JSON, валідує через `zod` (whitelist `contentType`), вставляє запис у чергу з `source='web'`, `sheet_row_id=NULL`.
+- HTML-форма + жива таблиця всіх задач з обох джерел (live refresh).
 - Web-tasks **не** мають Sheet writeback (для них немає Sheet рядка); вони видимі тільки в UI.
 
-Та сама state-machine (`queued → ... → published`), що й для sheet-tasks. Реалізовано в [[task-queue|status simulator]].
+Та сама state-machine (`queued → ... → published`), що й для sheet-tasks (див. [[task-queue]]).
+
+*Цей концепт **не імплементовано** в репозиторії — Task 1 є теоретичною частиною за вимогами PDF. Дизайн зафіксовано для phase plan і референсу в [[../synthesis/architecture-overview]].*
 
 ## Tradeoffs
 
@@ -45,4 +46,3 @@ UI дає миттєвий path-to-task без табличного контек
 
 ## Sources
 - [[../sources/kraken-leads-test-task]] — питання 1 PDF
-- Реалізація: `intake/src/web/{routes.ts,public/}`

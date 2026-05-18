@@ -12,7 +12,7 @@ mirror: ../../wiki-en/synthesis/architecture-overview.md
 # Architecture overview
 
 ## TL;DR
-Проект складається з трьох незалежних, але семантично пов'язаних шарів: (1) **Task 1** — концепція та частковий PoC системи генерації SEO-сайтів (intake → queue → pipeline → publish); (2) **Task 2** — повний прототип моніторингу брендованої видачі з класифікатором; (3) **документація** — Karpathy LLM-Wiki з atomic-pages в UA+EN. Реалізовано: intake-шар Task 1 + Task 2 prototype (в плані).
+Проект складається з трьох незалежних, але семантично пов'язаних шарів: (1) **Task 1** — концепція системи генерації SEO-сайтів (intake → queue → pipeline → publish) — за PDF лише теоретична частина; (2) **Task 2** — концепція + робочий прототип моніторингу брендованої видачі з класифікатором; (3) **документація** — Karpathy LLM-Wiki з atomic-pages в UA+EN. Реалізовано: вся wiki + 12 atomic concepts; Task 2 prototype — у плані.
 
 ---
 
@@ -27,17 +27,17 @@ mirror: ../../wiki-en/synthesis/architecture-overview.md
 
 ```mermaid
 flowchart LR
-    subgraph SOURCES["Task intake (реалізовано в intake/)"]
+    subgraph SOURCES["Task intake (концепція)"]
       direction TB
       S1["📊 Google Sheets<br/><i>OAuth 2.0 + 60s polling</i>"]
-      S2["📝 Web Form UI<br/><i>Fastify + Vanilla JS</i>"]
+      S2["📝 Web Form UI<br/><i>HTTP form + REST</i>"]
     end
 
-    I["Intake Service<br/>(intake/src/sheets, web)"]
-    Q[("Unified Task Queue<br/>SQLite + state machine")]
-    SIM["Status Simulator<br/>(queued → … → published)"]
+    I["Intake Service<br/><i>OAuth + polling worker</i>"]
+    Q[("Unified Task Queue<br/>state machine + idempotency")]
+    SIM["Status Tracker<br/>(queued → … → published)"]
 
-    subgraph PIPE["Pipeline (концепція, не реалізовано)"]
+    subgraph PIPE["Pipeline (концепція)"]
       direction LR
       P1["SERP Analysis<br/><i>SerpAPI / DataForSEO</i>"]
       P2["Competitor Scraping<br/><i>Playwright + Readability</i>"]
