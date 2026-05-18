@@ -127,10 +127,6 @@
     "monitoring": {
       "title": "Розклад перевірок",
       "body": "Планувальник запускає аналіз за cron-розкладом. За замовчуванням — кожні 4 години (180 запусків/міс у межах безкоштовного ліміту SerpAPI 250/міс). У «Налаштуваннях» можна змінити інтервал, тригернути одноразову перевірку або зупинити автозапуск. Кожен запуск зберігається як знімок із унікальним ID."
-    },
-    "stack": {
-      "title": "Технологічний стек",
-      "body": "Backend: Node.js 20, TypeScript, Fastify, Playwright (Chromium), better-sqlite3, OpenRouter API. Frontend: React, Vite, Tailwind, shadcn/ui, Recharts. Інфраструктура: Docker Compose (web + worker), Caddy reverse-proxy із DNS-01 Let's Encrypt, Cloudflare (DNS-only)."
     }
   },
   "keyword": {

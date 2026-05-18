@@ -143,10 +143,6 @@ export function HelpSheet() {
           <Section title={t("help.monitoring.title")}>
             <p>{t("help.monitoring.body")}</p>
           </Section>
-
-          <Section title={t("help.stack.title")}>
-            <p className="text-xs">{t("help.stack.body")}</p>
-          </Section>
         </div>
       </SheetContent>
     </Sheet>

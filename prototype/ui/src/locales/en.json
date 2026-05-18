@@ -127,10 +127,6 @@
     "monitoring": {
       "title": "Check schedule",
       "body": "The scheduler runs analysis on a cron expression. Default: every 4 hours (180 runs/month, within SerpAPI's free tier of 250/month). Settings let you change the interval, trigger a one-off check, or pause the schedule. Each run is persisted as a snapshot with a unique ID."
-    },
-    "stack": {
-      "title": "Technology stack",
-      "body": "Backend: Node.js 20, TypeScript, Fastify, Playwright (Chromium), better-sqlite3, OpenRouter API. Frontend: React, Vite, Tailwind, shadcn/ui, Recharts. Infrastructure: Docker Compose (web + worker), Caddy reverse proxy with DNS-01 Let's Encrypt, Cloudflare (DNS-only)."
     }
   },
   "keyword": {
