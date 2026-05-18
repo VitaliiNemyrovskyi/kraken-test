@@ -1,0 +1,187 @@
+---
+title: Task 2 — answer to PDF questions
+category: synthesis
+summary: Sequential answer to Task 2 PDF questions — branded SERP monitoring concept for StarCasino (NL) with domain auto-classification and dashboards
+tags: [task2, deliverable-view, starcasino, nl, classification]
+sources: 1
+updated: 2026-05-18
+lang: en
+mirror: ../../wiki/synthesis/task-2-answer.md
+---
+
+# Task 2 — answer to PDF questions
+
+> **Brand:** StarCasino (Netherlands) • **Geo:** NL • **Primary prototype query:** `starcasino`, top-10 SERP
+> **Source:** [[../sources/kraken-leads-test-task]] (question 2)
+> **Architecture:** [[architecture-overview#Layer 2 — Task 2: Branded SERP Monitor (StarCasino NL)]]
+
+Each answer — 2-3 sentences of direct reply + [[wikilinks]] to atomic pages for details.
+
+---
+
+## 1. How will domain type be auto-detected?
+
+**Short:** A multi-layer classifier combines rule-based signals (60% weight) with LLM analysis (40%). For each domain from SERP the output is one of 4 categories (`official`, `affiliate`, `competitor_brand_thief`, `unclear`) with a confidence score.
+
+**Details:** [[../concepts/domain-classification]] — overview of the three categories; [[../concepts/classifier-scoring]] — combined rule+LLM scoring matrix with weights and threshold.
+
+---
+
+## 2. Which signals will be used?
+
+**Short:** 8 rule-based signals + an LLM verdict via OpenRouter:
+- **Domain match** (for official)
+- **Outbound link ratios** to the brand domain vs to competitor casinos
+- **Affiliate parameters** in URLs (`btag`, `aff_id`, `ref`, `partnerid`, `clickid`, `sub_id`, `utm_source=affiliate`)
+- **Redirect chain resolution** (max 5 hops, 10s budget) through affiliate networks (income-access, netrefer, affise)
+- **Primary CTA destination** after resolution
+- **Brand mention density** in text (TF-IDF)
+- **Schema.org Organization/Brand markup**
+- **WHOIS / SSL certificate org** (for official disambiguation)
+
+**Details:** [[../concepts/official-domain-signals]], [[../concepts/affiliate-detection]], [[../concepts/competitor-thief-detection]]; [[../entities/nl-competitor-casinos]] — list (TonyBet, Holland Casino, JACKS.NL, BetCity, Unibet, 711.nl, Toto.nl).
+
+---
+
+## 3. How to distinguish affiliate (→ StarCasino) from competitor (→ other casino)?
+
+**This is the key question of Task 2.** Decisive signal — **final destination of monetised links after redirect resolution**, NOT brand mention.
+
+| Signal | Affiliate (proper) | Competitor brand thief |
+|---|---|---|
+| Final domain of primary CTA | `starcasino.nl` | other casino from [[../entities/nl-competitor-casinos]] |
+| Outbound link ratio | starLinkRatio ≥ 0.5 | compLinkRatio ≥ 0.4 |
+| Affiliate params on brand links | yes | NO |
+| Affiliate params on competitor links | NO | yes |
+| Brand mention in title/H1/snippet | present (for ranking) | present (for ranking) |
+
+**Dual-promote edge case** (site promotes both StarCasino and others): leans towards `competitor_brand_thief` (weight +35 vs +25 for affiliate) — partial traffic diversion to a competitor is already brand-damaging. Recorded in [[../concepts/adr-008-dual-promote-tiebreak]].
+
+**Details:** [[../comparisons/affiliate-vs-brand-thief-signals]] — full signals table with weights; [[../concepts/classifier-scoring]] — scoring matrix.
+
+---
+
+## 4. Regular monitoring mechanism
+
+**Short:** Daily cron-trigger; for top-priority brand queries — 4× per day. Each run produces an immutable snapshot. Changes between snapshots are detected via the `domain_history` table with a `category_changes` counter field.
+
+- **Cadence:** daily for `starcasino`, `star casino`, `starcasino nl`; weekly for long-tail (`starcasino bonus`, `starcasino review`, `starcasino login`, etc.)
+- **Storage:** append-only snapshots; never overwritten, only added. Enables time-series analysis.
+- **Multi-geo support:** via config — NL primary, additional geos added without code changes
+
+**Details:** [[../concepts/monitoring-cadence]], [[../concepts/drift-detection]].
+
+---
+
+## 5. Data storage
+
+**Short:** PostgreSQL in production, SQLite in the prototype. 5 tables:
+
+```sql
+keywords         (id, query, geo, language, brand)
+snapshots        (id, keyword_id, fetched_at, source)
+serp_results     (id, snapshot_id, position, url, domain, title, snippet)
+classifications  (id, result_id, category, confidence, rule_score_json,
+                  llm_verdict_json, signals_json, classified_at)
+domain_history   (domain, keyword_id, first_seen, last_seen,
+                  last_category, category_changes)
+```
+
+Schema & index details: [[../concepts/storage-schema-task2]] (forward ref).
+
+---
+
+## 6. How are percentages and domain counts computed?
+
+**Short:** Aggregation over the latest snapshot by `keyword_id` + `geo`. For each category: count + percentage (count / total × 100). For time-series — group by `taken_at::date`.
+
+Example SQL:
+```sql
+SELECT category,
+       COUNT(*) AS count,
+       ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct
+FROM classifications c
+JOIN serp_results r ON r.id = c.result_id
+JOIN snapshots s ON s.id = r.snapshot_id
+WHERE s.id = (SELECT MAX(id) FROM snapshots WHERE keyword_id = ?)
+GROUP BY category;
+```
+
+API endpoint: `GET /api/summary?keyword=starcasino&geo=nl` returns `{official: 1, affiliate: 4, competitor_brand_thief: 3, unclear: 2}` + percentages.
+
+---
+
+## 7. Dashboards
+
+**Short:** Fastify server with Chart.js inline (no build step). 4 views:
+
+1. **Latest distribution** — pie chart `official/affiliate/thief/unclear` for the most recent snapshot
+2. **Time-series** — line chart of % per category over time (drift detection)
+3. **Top domains per category** — table with expand for drill-down (signals + LLM explanation)
+4. **Domain history** — for a specific domain: every snapshot it appeared in, its categories over time, total category-changes
+
+**Details:** [[../concepts/dashboard-design]]; borrows from [[../entities/fastify]] + Chart.js already used in the [[../concepts/web-ui-intake|intake demo]].
+
+---
+
+## 8. List of specific domains in each category
+
+**Short:** API `GET /api/domains/:category?keyword=starcasino` returns the list of domains in a category from the most recent snapshot, ordered by SERP position. Each record: `{domain, url, position, confidence, explanation}`.
+
+Expected results for top-10 NL on query `starcasino`:
+
+| Category | Expected domains (examples) |
+|---|---|
+| `official` | `starcasino.nl` |
+| `affiliate` | gambling-themed media sites driving traffic to starcasino with aff params (`casino.org`, `casino.nl`, partner networks) |
+| `competitor_brand_thief` | review sites that rank on the StarCasino brand but the CTA points to JACKS.NL, BetCity, Unibet, etc. |
+| `unclear` | general media (Wikipedia, news) without monetisation |
+
+Exact list to come from a real SERP fetch in [[#9. Practical prototype|the prototype]].
+
+---
+
+## 9. Practical prototype (top-10 NL for `starcasino`)
+
+**Short:** Node.js 20 + TypeScript strict + Fastify + Playwright + SQLite + OpenRouter. **Planned** after other priority work. Architecture fully described in [[architecture-overview#Layer 2 — Task 2: Branded SERP Monitor (StarCasino NL)]].
+
+**Stack rationale:** [[../concepts/adr-005-stack-nodejs]] (consistency with [[../concepts/web-ui-intake|intake service]]); [[../concepts/adr-006-storage-sqlite]] (single-process simplicity); [[../concepts/adr-007-signal-weights]] (rule 0.6 + LLM 0.4 rationale); [[../concepts/adr-008-dual-promote-tiebreak]] (competitor wins).
+
+**CLI:**
+- `npm run analyze` — real run (SerpAPI + Playwright + OpenRouter)
+- `npm run analyze:mock` — fully offline on `data/mock-serp.json`
+- `npm run dashboard` — Fastify at :3000
+
+**Verification:**
+- `starcasino.nl` → `official`, confidence > 0.9
+- 2-3 sites → `affiliate` or `competitor_brand_thief` with explanatory signals JSON
+- Dashboard renders pie + drill-down
+
+---
+
+## 10. Scaling
+
+**Short:** Linear with the number of queries × geos × cadence.
+
+- **N queries × M geos × 30 days** = N×M×30 snapshots/month
+- DataForSEO replaces SerpAPI at scale (~$0.0006/SERP vs $0.005 for SerpAPI)
+- LLM classification is cached per domain (TTL 7 days) — most domains are stable
+- Worker pool via k8s/ECS + Redis queue replaces cron when throughput exceeds ~100 snapshots/min
+
+**Details:** [[../concepts/scaling-bottlenecks]] (forward ref).
+
+---
+
+## Cross-link to Task 1
+
+Domains classified as `affiliate` in Task 2 become **competitor intelligence input** for the content generation pipeline of Task 1 ([[architecture-overview#Cross-layer integration]]). Conversely, the Task 2 dashboard can **show impact** of SEO pages generated through Task 1 (their rankings on brand queries).
+
+---
+
+## Related
+
+- [[../sources/kraken-leads-test-task]] — original brief
+- [[architecture-overview]] — diagrams
+- [[../concepts/domain-classification]], [[../concepts/affiliate-detection]], [[../concepts/competitor-thief-detection]], [[../concepts/classifier-scoring]]
+- [[../entities/starcasino-nl]], [[../entities/nl-competitor-casinos]]
+- [[task-1-answer]] (not yet created)

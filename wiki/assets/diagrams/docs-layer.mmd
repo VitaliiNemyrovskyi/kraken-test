@@ -1,0 +1,50 @@
+---
+title: Documentation Layer — Karpathy LLM-Wiki
+config:
+  theme: dark
+  themeVariables:
+    primaryColor: '#1a2332'
+    primaryTextColor: '#e4e7ee'
+    primaryBorderColor: '#4ea1ff'
+    lineColor: '#8b93a5'
+    background: '#0f1115'
+    fontFamily: 'Inter, -apple-system, sans-serif'
+---
+flowchart LR
+    subgraph L1["Layer 1 — Raw (immutable)"]
+      PDF["raw/<br/>kraken-leads-test-task.pdf<br/>+ external-refs/"]
+    end
+
+    subgraph L2A["Layer 2A — wiki/ (UA primary)"]
+      direction TB
+      IDX_UA["index.md<br/>(auto-regenerated)"]
+      LOG_UA["log.md<br/>(append-only)"]
+      E_UA["entities/<br/>tools, brands, APIs"]
+      C_UA["concepts/<br/>system components,<br/>ADRs, phases"]
+      S_UA["sources/<br/>LLM summaries"]
+      CMP_UA["comparisons/"]
+      SYN_UA["synthesis/"]
+    end
+
+    subgraph L2B["Layer 2B — wiki-en/ (EN mirror)"]
+      MIR["Mirror of wiki/<br/>same pages<br/>frontmatter mirror: …"]
+    end
+
+    subgraph L3["Layer 3 — Schema"]
+      CM["CLAUDE.md<br/>iron rules + skills matrix<br/>+ karpathy-coder principles"]
+    end
+
+    PDF -.->|"LLM reads"| S_UA
+    S_UA --> C_UA
+    S_UA --> E_UA
+    C_UA --> SYN_UA
+    E_UA --> SYN_UA
+    CMP_UA --> SYN_UA
+    L2A <-.->|"1:1 mirror"| L2B
+    CM -.->|"governs"| L2A
+    CM -.->|"governs"| L2B
+
+    style L1 fill:#1a1a2a,stroke:#8b93a5,color:#e4e7ee
+    style L2A fill:#1a2332,stroke:#4ea1ff,color:#e4e7ee
+    style L2B fill:#1a2332,stroke:#4ea1ff,color:#e4e7ee,stroke-dasharray: 3 3
+    style L3 fill:#2a201a,stroke:#ffb84a,color:#e4e7ee

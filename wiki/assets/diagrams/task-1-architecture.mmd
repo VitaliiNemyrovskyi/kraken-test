@@ -1,0 +1,46 @@
+---
+title: Task 1 — SEO Automation Architecture
+config:
+  theme: dark
+  themeVariables:
+    primaryColor: '#1a2332'
+    primaryTextColor: '#e4e7ee'
+    primaryBorderColor: '#4ea1ff'
+    lineColor: '#8b93a5'
+    secondaryColor: '#2a1a2a'
+    tertiaryColor: '#181b22'
+    background: '#0f1115'
+    fontFamily: 'Inter, -apple-system, sans-serif'
+---
+flowchart LR
+    subgraph SOURCES["Task intake (implemented in intake/)"]
+      direction TB
+      S1["Google Sheets<br/><i>OAuth 2.0 + 60s polling</i>"]
+      S2["Web Form UI<br/><i>Fastify + Vanilla JS</i>"]
+    end
+
+    I["Intake Service<br/>(intake/src/sheets, web)"]
+    Q[("Unified Task Queue<br/>SQLite + state machine")]
+    SIM["Status Simulator<br/>(queued → … → published)"]
+
+    subgraph PIPE["Pipeline (concept, not yet implemented)"]
+      direction LR
+      P1["SERP Analysis<br/><i>SerpAPI / DataForSEO</i>"]
+      P2["Competitor Scraping<br/><i>Playwright + Readability</i>"]
+      P3["Topical Brief<br/><i>LLM clustering</i>"]
+      P4["AI Content<br/><i>Claude Sonnet via OpenRouter</i>"]
+      P5["HTML + SEO<br/><i>Astro + Schema.org</i>"]
+      P6["Deploy<br/><i>Cloudflare Pages API</i>"]
+      P1 --> P2 --> P3 --> P4 --> P5 --> P6
+    end
+
+    S1 -->|"polling"| I
+    S2 -->|"POST /api/tasks"| I
+    I --> Q
+    Q --> SIM
+    SIM -.->|"writeback when source='sheet'"| S1
+    SIM ---> PIPE
+    PIPE -->|"output URL"| SIM
+
+    style SOURCES fill:#1a2332,stroke:#4ea1ff,color:#e4e7ee
+    style PIPE fill:#2a1a2a,stroke:#b06bff,color:#e4e7ee,stroke-dasharray: 5 5

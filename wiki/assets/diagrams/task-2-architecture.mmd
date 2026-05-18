@@ -1,0 +1,55 @@
+---
+title: Task 2 — Branded SERP Monitor (StarCasino NL)
+config:
+  theme: dark
+  themeVariables:
+    primaryColor: '#1a2332'
+    primaryTextColor: '#e4e7ee'
+    primaryBorderColor: '#4ea1ff'
+    lineColor: '#8b93a5'
+    background: '#0f1115'
+    fontFamily: 'Inter, -apple-system, sans-serif'
+---
+flowchart TB
+    CRON["Daily Cron<br/>(query: starcasino, geo: NL)"]
+    SERP["SERP Fetch<br/><i>SerpAPI free tier<br/>+ Playwright fallback<br/>+ mock fixture</i>"]
+    SC["Page Scraper<br/><i>Playwright Chromium<br/>outbound links, redirects, CTA</i>"]
+
+    subgraph CLASS["Classifier (rules:0.6 + LLM:0.4)"]
+      direction LR
+      R["Rule signals<br/>• domain match<br/>• outbound link ratios<br/>• affiliate-param regex<br/>• redirect chain<br/>• CTA destination"]
+      L["LLM signal<br/><i>Claude Opus 4.7<br/>via OpenRouter</i><br/>JSON structured output"]
+      SCORE{Combined<br/>score ≥ 40}
+      R --> SCORE
+      L --> SCORE
+    end
+
+    SCORE -->|"argmax"| CAT["Category"]
+
+    subgraph OUT["Output categories"]
+      direction TB
+      OFF["Official<br/><i>starcasino.nl</i>"]
+      AFF["Affiliate<br/><i>aff_params to starcasino</i>"]
+      THIEF["Competitor Brand Thief<br/><i>brand mention but<br/>monetisation to OTHER casino</i>"]
+      UNC["Unclear"]
+    end
+
+    DB[("SQLite snapshots<br/>+ classifications<br/>+ domain history")]
+
+    DASH["Dashboard<br/>(Fastify + Chart.js)<br/>• Pie chart<br/>• Time-series<br/>• Drill-down per domain"]
+
+    CRON --> SERP --> SC --> CLASS
+    CAT --> OFF
+    CAT --> AFF
+    CAT --> THIEF
+    CAT --> UNC
+    OFF --> DB
+    AFF --> DB
+    THIEF --> DB
+    UNC --> DB
+    DB --> DASH
+
+    style CRON fill:#1a2a1a,stroke:#4ad295,color:#e4e7ee
+    style CLASS fill:#2a201a,stroke:#ffb84a,color:#e4e7ee
+    style THIEF fill:#2a1a1a,stroke:#ff6b6b,color:#e4e7ee
+    style OFF fill:#1a2a1a,stroke:#4ad295,color:#e4e7ee
