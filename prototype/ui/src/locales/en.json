@@ -80,6 +80,58 @@
     "title": "Settings",
     "description": "Manage tracked keywords and the monitoring scheduler. Defaults: every 6 hours, single keyword."
   },
+  "help": {
+    "button": "Help",
+    "open": "Open help",
+    "title": "How this works",
+    "subtitle": "Signal architecture, why some verdicts end up Unclear, how monitoring runs.",
+    "intro": {
+      "title": "What the dashboard tracks",
+      "body": "Every scheduler tick fetches the top-10 Google SERP for a branded query (default: 'starcasino', geo Netherlands), scrapes each result via headless Chromium, then classifies the domain into one of four buckets. Snapshots are stored in SQLite — the history chart shows how the mix shifts over time."
+    },
+    "categories": {
+      "title": "Categories",
+      "official": "The brand domain itself ranking (starcasino.nl) — instantly decisive, +100 from the rule signal.",
+      "affiliate": "A third-party site that monetises in the brand's favour: the primary CTA resolves to starcasino.nl with an affiliate tag (btag, aff_id…). Most review portals belong here.",
+      "thief": "Most threatening: the page ranks on the brand query but the CTA sends users to OTHER casinos (jacks.nl, tonybet.nl…). The brand is just SEO bait; monetisation flows to competitors.",
+      "unclear": "Not enough signal — informational article, Wikipedia, or a site behind bot protection that returned an empty HTML."
+    },
+    "signals": {
+      "title": "Signal architecture",
+      "intro": "The classifier fuses deterministic rule signals with an LLM verdict (Claude Opus 4.7 via OpenRouter). Signals split into two layers by whether they need a successful page scrape:",
+      "serpLayer": "SERP layer (always available)",
+      "serpBody": "Visible right in the SERP — can't be hidden by Cloudflare.",
+      "serpItems": {
+        "0": "Page domain = brand domain → official",
+        "1": "Domain contains the brand stem (starcasino-nl.com) → affiliate/thief prior",
+        "2": "Title fits a review/listicle pattern (review, top 10, beste, alternatieven) → affiliate prior"
+      },
+      "pageLayer": "Page layer (needs a scrape)",
+      "pageBody": "Stronger but brittle: bot protection or JS-injected CTAs zero them all out.",
+      "pageItems": {
+        "0": "Outbound links → starcasino.nl or a competitor + affiliate params",
+        "1": "Primary CTA target after redirect resolution",
+        "2": "Anchor says 'brand', href resolves to a competitor → cloaking",
+        "3": "Visible affiliate disclosure (EU/FTC compliance)"
+      },
+      "fusion": "Final category = argmax(rule × 0.6 + LLM × 0.4); if top score < 30 → Unclear. When the LLM says 'Unclear' it's treated as abstention, not a vote against — rule scores then act at weight 1.0."
+    },
+    "unclear": {
+      "title": "Why so many Unclear?",
+      "body1": "The decisive signal for telling 'affiliate-to-brand' from 'competitor brand thief' is the final domain after clicking the primary CTA and resolving the redirect chain. `final == starcasino.nl + btag=…` → affiliate; `final == jacks.nl + aff_id=…` → thief.",
+      "body2": "On the real NL SERP, 6 of 10 top results sit behind Cloudflare/DataDome bot protection. Headless Playwright gets a challenge page with no body content; affiliate links are typically injected via JS after the load event.",
+      "calloutTitle": "Honest forecast",
+      "calloutBody": "A passive scraper has a floor on Unclear. Production-grade classification needs an active probe — click the CTA in an isolated browser context, await page.waitForURL(). Out of the prototype's scope — documented in wiki/synthesis/phase-plan."
+    },
+    "monitoring": {
+      "title": "How monitoring works",
+      "body": "The scheduler (node-cron) lives in a separate worker container and reads the desired cron from SQLite (scheduler_control). Default cadence: every 4 hours (180 runs/month, within the free SerpAPI quota of 250/month). Settings let you change the interval, fire a one-off run, or stop the scheduler. The web container only writes desired_cron — the worker reconciles."
+    },
+    "stack": {
+      "title": "Stack",
+      "body": "Worker (Node 20 + TypeScript): node-cron, SerpAPI / Playwright fallback, headless Chromium, cheerio, better-sqlite3, OpenRouter (Claude Opus 4.7), whoiser for WHOIS enrichment. Web (Fastify + React + Vite + Tailwind + shadcn/ui + Recharts). Infra: Docker Compose with a multi-stage Dockerfile, Caddy reverse proxy + DNS-01 Let's Encrypt, Cloudflare DNS-only."
+    }
+  },
   "keyword": {
     "title": "Tracked keywords",
     "hint": "Each keyword is monitored on every scheduler tick. Switch which one the dashboard shows from the header.",

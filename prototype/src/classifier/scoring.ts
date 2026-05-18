@@ -116,11 +116,15 @@ export function combineWithLlm(
   rule: RuleVerdict,
   llm: LlmVerdict | null,
 ): ClassificationResult {
-  // LLM "unclear" is treated as abstention, not a vote against other
-  // categories — "I don't know" should not suppress a confident rule signal.
-  // In that case rule scores act on their own (weight 1.0). Otherwise the
-  // usual 60/40 fusion applies.
-  const llmAbstains = !llm || llm.category === "unclear";
+  // LLM "unclear" is normally treated as abstention, not a vote against
+  // other categories — "I don't know" should not suppress a confident rule
+  // signal (rule weight then goes to 1.0). EXCEPT when the LLM is very
+  // confident in "unclear" (≥0.80) — review aggregators like Trustpilot,
+  // Wikipedia, App Store listings score this confidently because they
+  // genuinely have no monetisation signal, and the rule-only SERP-pattern
+  // heuristic (R12 review-portal) over-fires on them otherwise.
+  const llmAbstains =
+    !llm || (llm.category === "unclear" && llm.confidence < 0.8);
   const ruleW = llmAbstains ? 1.0 : RULE_WEIGHT;
   const llmW = llmAbstains ? 0 : LLM_WEIGHT;
   const llmCategory = llm?.category ?? null;

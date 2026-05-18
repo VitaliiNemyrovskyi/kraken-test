@@ -5,6 +5,7 @@ import { CategoryPie } from "./components/CategoryPie";
 import { SummaryCards } from "./components/SummaryCards";
 import { DomainsTable } from "./components/DomainsTable";
 import { HistoryChart } from "./components/HistoryChart";
+import { HelpSheet } from "./components/HelpSheet";
 import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { SettingsSheet } from "./components/SettingsSheet";
 import { KeywordSelector, type Keyword } from "./components/KeywordSelector";
@@ -115,6 +116,7 @@ export function App() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <HelpSheet />
           <SettingsSheet
             locale={locale}
             keywords={keywords}

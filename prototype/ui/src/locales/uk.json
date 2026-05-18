@@ -80,6 +80,58 @@
     "title": "Налаштування",
     "description": "Керування ключовими словами та планувальником моніторингу. За замовчуванням — кожні 6 годин, один ключ."
   },
+  "help": {
+    "button": "Довідка",
+    "open": "Відкрити довідку",
+    "title": "Як це працює",
+    "subtitle": "Архітектура сигналів, чому виникає категорія Unclear, як працює моніторинг.",
+    "intro": {
+      "title": "Що моніторить дашборд",
+      "body": "Кожен tick планувальника тягне топ-10 Google SERP для заданого бренд-запиту (за замовчуванням «starcasino», geo Нідерланди), скрейпить кожну сторінку через headless Chromium, потім класифікує домен у одну з 4 категорій. Знімки зберігаються у SQLite — динаміку видно у графіку «History»."
+    },
+    "categories": {
+      "title": "Категорії",
+      "official": "Бренд-домен сам ранжує (starcasino.nl) — миттєво decisive, +100 балів за rule-сигналом.",
+      "affiliate": "Сайт-партнер, який монетизується на користь бренду — primary CTA веде на starcasino.nl з aff-параметром (btag, aff_id…). Більшість review-порталів сюди.",
+      "thief": "Найзагрозливіше: сайт ранжує на брендовому запиті, але CTA веде на ІНШЕ казино (jacks.nl, tonybet.nl…). Бренд експлуатується як SEO-трафік, гроші течуть до конкурента.",
+      "unclear": "Недостатньо сигналу — інформаційна стаття, Wikipedia, або сайт за bot-protection що повертає порожній HTML."
+    },
+    "signals": {
+      "title": "Архітектура сигналів",
+      "intro": "Класифікатор поєднує детерміновані rule-сигнали та LLM-вердикт (Claude Opus 4.7 через OpenRouter). Сигнали розбиті на дві лінії за тим, чи потрібен їм успішний скрейп сторінки:",
+      "serpLayer": "SERP-рівень (завжди працює)",
+      "serpBody": "Видимий прямо у SERP — не може бути схований Cloudflare-ом.",
+      "serpItems": {
+        "0": "Домен сторінки = бренд-домен → official",
+        "1": "Домен містить brand stem (starcasino-nl.com) → afiliate/thief prior",
+        "2": "Title має review/listicle шаблон (review, top 10, beste, alternatieven) → афіліат-prior"
+      },
+      "pageLayer": "Page-рівень (потребує скрейпу)",
+      "pageBody": "Сильніші, але крихкі: bot-protection або JS-injected CTA = усі ці сигнали 0.",
+      "pageItems": {
+        "0": "Outbound лінки → starcasino.nl чи на конкурента + aff-параметри",
+        "1": "Primary CTA target після redirect resolution",
+        "2": "CTA anchor каже «бренд», href веде на конкурента → cloaking",
+        "3": "Affiliate disclosure (EU/FTC compliance)"
+      },
+      "fusion": "Кінцева категорія = argmax(rule × 0.6 + LLM × 0.4); якщо найвищий бал < 30 → Unclear. Коли LLM каже «Unclear» — це abstention, не голос проти, тож rule працює з вагою 1.0."
+    },
+    "unclear": {
+      "title": "Чому буває багато Unclear?",
+      "body1": "Decisive сигнал для розрізнення «партнер бренду» vs «крадій бренду» — кінцевий домен у redirect chain після кліку на primary CTA. Якщо `final == starcasino.nl + btag=…` → affiliate; якщо `final == jacks.nl + aff_id=…` → thief.",
+      "body2": "Але на реальному NL SERP 6 з 10 топ-результатів — за Cloudflare / DataDome bot-protection. Headless Playwright отримує challenge-сторінку без контенту, афіліатні лінки інжектяться через JS після завантаження.",
+      "calloutTitle": "Чесний прогноз",
+      "calloutBody": "Пасивний скрейпер має floor щодо Unclear. Для production-grade класифікації потрібен active probe — клікнути CTA в окремому browser context, дочекатись page.waitForURL(). Поза скоупом прототипу — описано в wiki/synthesis/phase-plan."
+    },
+    "monitoring": {
+      "title": "Як працює моніторинг",
+      "body": "Планувальник (node-cron) живе в окремому worker-контейнері та читає бажаний cron з SQLite (scheduler_control). За замовчуванням — кожні 4 години (180 запусків/міс, у межах безкоштовного SerpAPI ліміту 250/міс). У Settings можна змінити інтервал, тригернути одноразовий run, або зупинити. Web-контейнер тільки пише desired_cron — реконсиляція робиться воркером."
+    },
+    "stack": {
+      "title": "Стек",
+      "body": "Worker (Node 20 + TypeScript): node-cron, SerpAPI / Playwright fallback, headless Chromium, cheerio, better-sqlite3, OpenRouter (Claude Opus 4.7), whoiser для WHOIS-enrichment. Web (Fastify + React + Vite + Tailwind + shadcn/ui + Recharts). Інфраструктура: Docker Compose з multi-stage Dockerfile, Caddy reverse-proxy + DNS-01 Let's Encrypt, Cloudflare DNS-only."
+    }
+  },
   "keyword": {
     "title": "Відстежувані ключові слова",
     "hint": "Кожний keyword моніториться при кожному tick. Поточний для перегляду обирається у хедері.",
