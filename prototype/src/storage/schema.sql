@@ -56,6 +56,21 @@ CREATE TABLE IF NOT EXISTS domain_history (
   FOREIGN KEY(keyword_id) REFERENCES keywords(id)
 );
 
+-- Singleton row driving the worker container. Web container WRITES the
+-- desired state (desired_cron, trigger_requested_at); worker container
+-- POLLS this row, applies changes, and writes the current status back.
+-- Decouples the two containers — no inter-container HTTP needed.
+CREATE TABLE IF NOT EXISTS scheduler_control (
+  id                     INTEGER PRIMARY KEY CHECK(id = 1),
+  desired_cron           TEXT,                -- NULL = stopped
+  trigger_requested_at   TEXT,                -- web sets, worker clears
+  last_status_json       TEXT NOT NULL,       -- worker writes
+  updated_at             TEXT NOT NULL
+);
+
+INSERT OR IGNORE INTO scheduler_control (id, desired_cron, last_status_json, updated_at)
+  VALUES (1, NULL, '{"active":false,"cron":null,"lastRunAt":null,"lastRunDurationMs":null,"lastRunError":null,"busy":false}', '1970-01-01T00:00:00.000Z');
+
 CREATE TABLE IF NOT EXISTS domain_enrichment (
   domain                TEXT PRIMARY KEY,
   registrar             TEXT,

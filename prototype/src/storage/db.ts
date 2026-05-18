@@ -368,6 +368,67 @@ export function getDomainsByCategory(
   return snapshot.results.filter((r) => r.classification.category === category);
 }
 
+// ───── Scheduler control plane (DB-driven, replaces in-process scheduler) ─────
+
+export interface SchedulerStatus {
+  active: boolean;
+  cron: string | null;
+  lastRunAt: string | null;
+  lastRunDurationMs: number | null;
+  lastRunError: string | null;
+  busy: boolean;
+}
+
+export interface SchedulerControl {
+  desiredCron: string | null;
+  triggerRequestedAt: string | null;
+  status: SchedulerStatus;
+  updatedAt: string;
+}
+
+interface ControlRow {
+  desired_cron: string | null;
+  trigger_requested_at: string | null;
+  last_status_json: string;
+  updated_at: string;
+}
+
+export function readSchedulerControl(): SchedulerControl {
+  const row = db
+    .prepare("SELECT desired_cron, trigger_requested_at, last_status_json, updated_at FROM scheduler_control WHERE id = 1")
+    .get() as ControlRow;
+  return {
+    desiredCron: row.desired_cron,
+    triggerRequestedAt: row.trigger_requested_at,
+    status: JSON.parse(row.last_status_json) as SchedulerStatus,
+    updatedAt: row.updated_at,
+  };
+}
+
+export function writeDesiredCron(cron: string | null): void {
+  db.prepare(
+    "UPDATE scheduler_control SET desired_cron = ?, updated_at = ? WHERE id = 1",
+  ).run(cron, new Date().toISOString());
+}
+
+export function requestSchedulerTrigger(): void {
+  db.prepare(
+    "UPDATE scheduler_control SET trigger_requested_at = ?, updated_at = ? WHERE id = 1",
+  ).run(new Date().toISOString(), new Date().toISOString());
+}
+
+export function clearSchedulerTrigger(at: string): void {
+  db.prepare(
+    "UPDATE scheduler_control SET trigger_requested_at = NULL, updated_at = ? WHERE id = 1 AND trigger_requested_at = ?",
+  ).run(new Date().toISOString(), at);
+}
+
+export function writeSchedulerStatus(status: SchedulerStatus): void {
+  db.prepare(
+    "UPDATE scheduler_control SET last_status_json = ?, updated_at = ? WHERE id = 1",
+  ).run(JSON.stringify(status), new Date().toISOString());
+}
+
 export interface HistoryPoint {
   snapshotId: number;
   takenAt: string;

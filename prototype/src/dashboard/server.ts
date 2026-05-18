@@ -3,8 +3,8 @@ import fastifyStatic from "@fastify/static";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { z } from "zod";
+import cron from "node-cron";
 import { config } from "../config.js";
-import { scheduler } from "../scheduler.js";
 import {
   addKeyword,
   deleteKeyword,
@@ -14,6 +14,9 @@ import {
   getHistory,
   getLatestSnapshot,
   listKeywords,
+  readSchedulerControl,
+  requestSchedulerTrigger,
+  writeDesiredCron,
 } from "../storage/db.js";
 import type { Category } from "../types.js";
 
@@ -79,28 +82,32 @@ export async function createApp(): Promise<FastifyInstance> {
     return { points };
   });
 
-  // ───── Scheduler control ─────
-  app.get("/api/monitor/status", async () => scheduler.status());
+  // ───── Scheduler control (DB-driven; worker container reconciles) ─────
+  // Web does NOT own the scheduler. It writes desired state to
+  // `scheduler_control` and reads back the worker-published status.
+
+  app.get("/api/monitor/status", async () => readSchedulerControl().status);
 
   app.post("/api/monitor/start", async (req, reply) => {
     const body = (req.body ?? {}) as { cron?: string };
     if (!body.cron) {
       return reply.code(400).send({ ok: false, error: "missing_cron" });
     }
-    const result = scheduler.start(body.cron);
-    if (!result.ok) return reply.code(400).send({ ok: false, error: result.error });
-    return { ok: true, status: scheduler.status() };
+    if (!cron.validate(body.cron)) {
+      return reply.code(400).send({ ok: false, error: "invalid_cron" });
+    }
+    writeDesiredCron(body.cron);
+    return { ok: true, status: readSchedulerControl().status };
   });
 
   app.post("/api/monitor/stop", async () => {
-    scheduler.stop();
-    return { ok: true, status: scheduler.status() };
+    writeDesiredCron(null);
+    return { ok: true, status: readSchedulerControl().status };
   });
 
   app.post("/api/monitor/trigger", async () => {
-    // Run async — return immediately so UI doesn't time out on a slow analyze.
-    void scheduler.tick("manual");
-    return { ok: true, status: scheduler.status() };
+    requestSchedulerTrigger();
+    return { ok: true, status: readSchedulerControl().status };
   });
 
   // ───── Keyword management ─────
@@ -141,33 +148,17 @@ export async function createApp(): Promise<FastifyInstance> {
   return app;
 }
 
+// Standalone entry kept for `npm run dashboard` (dev convenience).
+// In production we use the two-process split: src/web.ts + src/worker.ts.
 export async function startServer(): Promise<FastifyInstance> {
   const app = await createApp();
   await app.listen({ port: config.PORT, host: config.HOST });
   console.log(
     `\n  Dashboard at http://${config.HOST}:${config.PORT}\n  Query: "${config.QUERY}" / geo: ${config.GEO}\n`,
   );
-
-  // Auto-start the scheduler with the configured cron unless MONITOR_CRON="off".
-  // This makes `npm run dashboard` a single-command experience: monitor runs
-  // automatically at the production-sensible default (every 6 hours).
-  if (config.MONITOR_CRON.toLowerCase() !== "off") {
-    const result = scheduler.start(config.MONITOR_CRON);
-    if (!result.ok) {
-      console.error(
-        `[server] invalid MONITOR_CRON: "${config.MONITOR_CRON}" (${result.error}) — scheduler not started`,
-      );
-    } else if (config.RUN_ON_START) {
-      setTimeout(() => void scheduler.tick("on-start"), 500);
-    }
-  } else {
-    console.log("[server] MONITOR_CRON=off — scheduler disabled (use UI to start)");
-  }
-
   return app;
 }
 
-// Run as standalone script
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
   startServer().catch((err) => {
     console.error(err);

@@ -1,0 +1,23 @@
+# Append this block to /opt/reflect/deploy/Caddyfile on Contabo, then:
+#   docker exec reflect_caddy caddy reload --config /etc/caddy/Caddyfile
+
+kraken-test.swift-mail.app {
+    # Same DNS-01 path as reflect.* (port 80 is taken by bober).
+    tls {
+        dns cloudflare {env.CADDY_CF_API_TOKEN}
+    }
+
+    # Points to the web container in the two-process split
+    # (web serves HTTP, worker owns the scheduler).
+    reverse_proxy kraken-test-web:3000
+
+    encode gzip zstd
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+}

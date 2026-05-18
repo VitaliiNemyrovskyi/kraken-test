@@ -1,6 +1,12 @@
 import "dotenv/config";
 import { z } from "zod";
 
+// z.coerce.boolean() treats any non-empty string (including "false") as true.
+// This helper handles common env-var falsy spellings explicitly.
+const envBool = z
+  .string()
+  .transform((v) => !["false", "0", "no", "off", ""].includes(v.trim().toLowerCase()));
+
 const schema = z.object({
   SERP_SOURCE: z.enum(["serpapi", "playwright", "mock"]).default("mock"),
   SERPAPI_KEY: z.string().default(""),
@@ -11,7 +17,7 @@ const schema = z.object({
   HL: z.string().default("nl"),
   GL: z.string().default("nl"),
   SERP_LIMIT: z.coerce.number().int().min(1).max(50).default(10),
-  CLASSIFIER_LLM_ENABLED: z.coerce.boolean().default(true),
+  CLASSIFIER_LLM_ENABLED: envBool.default("true"),
   OPENROUTER_API_KEY: z.string().default(""),
   OPENROUTER_MODEL: z.string().default("anthropic/claude-opus-4-7"),
   SCRAPER_TIMEOUT_MS: z.coerce.number().int().min(1000).default(15000),
@@ -23,7 +29,7 @@ const schema = z.object({
   // Scheduler defaults. MONITOR_CRON="off" disables auto-start.
   // "0 */6 * * *" = every 6h ≈ 120 runs/month (fits SerpAPI free tier for 1 query).
   MONITOR_CRON: z.string().default("0 */6 * * *"),
-  RUN_ON_START: z.coerce.boolean().default(true),
+  RUN_ON_START: envBool.default("true"),
 });
 
 export const config = schema.parse(process.env);

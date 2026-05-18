@@ -1,0 +1,56 @@
+x-shared: &shared
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: kraken-test:local
+  restart: unless-stopped
+  networks:
+    - reflect_net
+  volumes:
+    - kraken_data:/data
+  environment:
+    QUERY: ${QUERY:-starcasino}
+    GEO: ${GEO:-Netherlands}
+    BRAND_DOMAIN: ${BRAND_DOMAIN:-starcasino.nl}
+    SERP_SOURCE: ${SERP_SOURCE:-serpapi}
+    SERP_LIMIT: ${SERP_LIMIT:-10}
+    MONITOR_CRON: ${MONITOR_CRON:-0 */6 * * *}
+    RUN_ON_START: ${RUN_ON_START:-true}
+    CLASSIFIER_LLM_ENABLED: ${CLASSIFIER_LLM_ENABLED:-true}
+    OPENROUTER_MODEL: ${OPENROUTER_MODEL:-anthropic/claude-opus-4-7}
+    SERPAPI_KEY: ${SERPAPI_KEY}
+    OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+    HOST: 0.0.0.0
+    PORT: "3000"
+    DATABASE_PATH: /data/starcasino.db
+
+services:
+  # Pure Fastify — reads SQLite, no scheduler/scraper/Playwright in this process.
+  web:
+    <<: *shared
+    container_name: kraken-test-web
+    command: ["npx", "tsx", "src/web.ts"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/monitor/status >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # Owns the scheduler (node-cron), analyze pipeline, Playwright scraper,
+  # WHOIS enrichment. Polls SQLite scheduler_control table for commands
+  # from web; writes status back. No HTTP listener.
+  worker:
+    <<: *shared
+    container_name: kraken-test-worker
+    command: ["npx", "tsx", "src/worker.ts"]
+    depends_on:
+      web:
+        condition: service_started
+
+volumes:
+  kraken_data:
+
+networks:
+  reflect_net:
+    external: true
