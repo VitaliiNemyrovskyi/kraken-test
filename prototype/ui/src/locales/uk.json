@@ -1,0 +1,47 @@
+{
+  "header": {
+    "title": "StarCasino — Моніторинг брендованої видачі",
+    "query": "Запит",
+    "geo": "Geo",
+    "snapshot": "Знімок",
+    "source": "Джерело",
+    "results": "{{count}} результатів",
+    "no_snapshot": "Знімків ще немає — запустіть `npm run analyze:mock`."
+  },
+  "category": {
+    "official": "Офіційний",
+    "affiliate": "Партнерський",
+    "competitor_brand_thief": "Крадій бренду",
+    "unclear": "Невизначено"
+  },
+  "distribution": {
+    "title": "Розподіл"
+  },
+  "table": {
+    "title": "Топ-{{count}} доменів",
+    "hint": "Клікніть на рядок щоб побачити пояснення класифікатора.",
+    "empty": "Результатів поки немає.",
+    "col": {
+      "position": "#",
+      "domain": "Домен",
+      "category": "Категорія",
+      "confidence": "Впевненість",
+      "resolved": "Кінцевий →"
+    },
+    "row": {
+      "title": "Title",
+      "snippet": "Snippet",
+      "explanation": "Пояснення класифікатора"
+    }
+  },
+  "state": {
+    "loading": "Завантаження…",
+    "error": "Помилка: {{message}}"
+  },
+  "footer": "Kraken Leads — Task 2 прототип • React + Vite + Tailwind + shadcn/ui • Recharts • Fastify + Playwright + SQLite + OpenRouter (Claude Opus 4.7)",
+  "lang": {
+    "switch_to": "Перемкнути на {{language}}",
+    "en": "Англійську",
+    "uk": "Українську"
+  }
+}

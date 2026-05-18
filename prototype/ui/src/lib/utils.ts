@@ -5,12 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const CATEGORY_LABELS: Record<string, string> = {
-  official: "Official",
-  affiliate: "Affiliate",
-  competitor_brand_thief: "Brand Thief",
-  unclear: "Unclear",
-};
+// Category labels live in i18n locales (locales/{en,uk}.json -> category.*).
+// Use the `useTranslation()` hook and t(`category.${key}`) at render time.
 
 export const CATEGORY_COLORS: Record<string, string> = {
   official: "hsl(146, 60%, 55%)",

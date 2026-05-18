@@ -1,16 +1,18 @@
+import { useTranslation } from "react-i18next";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import type { CategoryCounts } from "../types";
-import { CATEGORY_COLORS, CATEGORY_LABELS } from "@/src/lib/utils";
+import { CATEGORY_COLORS } from "@/src/lib/utils";
 
 interface Props {
   counts: CategoryCounts;
 }
 
 export function CategoryPie({ counts }: Props) {
+  const { t } = useTranslation();
   const data = (
     Object.keys(counts) as (keyof CategoryCounts)[]
   ).map((key) => ({
-    name: CATEGORY_LABELS[key] ?? key,
+    name: t(`category.${key}`),
     key,
     value: counts[key],
   }));

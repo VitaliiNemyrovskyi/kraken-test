@@ -1,0 +1,47 @@
+{
+  "header": {
+    "title": "StarCasino — Branded SERP Monitor",
+    "query": "Query",
+    "geo": "Geo",
+    "snapshot": "Snapshot",
+    "source": "Source",
+    "results": "{{count}} results",
+    "no_snapshot": "No snapshot — run `npm run analyze:mock` first."
+  },
+  "category": {
+    "official": "Official",
+    "affiliate": "Affiliate",
+    "competitor_brand_thief": "Brand Thief",
+    "unclear": "Unclear"
+  },
+  "distribution": {
+    "title": "Distribution"
+  },
+  "table": {
+    "title": "Top-{{count}} domains",
+    "hint": "Click any row to see the classifier's reasoning.",
+    "empty": "No results yet.",
+    "col": {
+      "position": "#",
+      "domain": "Domain",
+      "category": "Category",
+      "confidence": "Confidence",
+      "resolved": "Resolved →"
+    },
+    "row": {
+      "title": "Title",
+      "snippet": "Snippet",
+      "explanation": "Classifier explanation"
+    }
+  },
+  "state": {
+    "loading": "Loading…",
+    "error": "Error: {{message}}"
+  },
+  "footer": "Kraken Leads — Task 2 prototype • React + Vite + Tailwind + shadcn/ui • Recharts • Fastify + Playwright + SQLite + OpenRouter (Claude Opus 4.7)",
+  "lang": {
+    "switch_to": "Switch to {{language}}",
+    "en": "English",
+    "uk": "Ukrainian"
+  }
+}

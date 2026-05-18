@@ -23,6 +23,7 @@
 | Storage | SQLite (`better-sqlite3`) — snapshots, classifications, domain_history |
 | Backend | Fastify (JSON API + static React build) |
 | **Frontend** | **React 18 + Vite 5 + Tailwind CSS 3 + shadcn/ui-style components + Recharts** |
+| **i18n** | **react-i18next** з UA + EN locales, toggle у хедері, persistence через localStorage |
 | Icons | lucide-react |
 | Validation | `zod` runtime contracts |
 

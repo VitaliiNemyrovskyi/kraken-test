@@ -1,15 +1,16 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
 import type { ResultRow } from "../types";
 import { Badge } from "./ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { CATEGORY_LABELS } from "@/src/lib/utils";
 
 interface Props {
   results: ResultRow[];
 }
 
 export function DomainsTable({ results }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
   const toggle = (pos: number) => {
@@ -24,11 +25,11 @@ export function DomainsTable({ results }: Props) {
       <TableHeader>
         <TableRow>
           <TableHead className="w-12"></TableHead>
-          <TableHead className="w-12">#</TableHead>
-          <TableHead>Domain</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead className="w-24 text-right">Confidence</TableHead>
-          <TableHead>Resolved →</TableHead>
+          <TableHead className="w-12">{t("table.col.position")}</TableHead>
+          <TableHead>{t("table.col.domain")}</TableHead>
+          <TableHead>{t("table.col.category")}</TableHead>
+          <TableHead className="w-24 text-right">{t("table.col.confidence")}</TableHead>
+          <TableHead>{t("table.col.resolved")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -63,7 +64,7 @@ export function DomainsTable({ results }: Props) {
                 </TableCell>
                 <TableCell>
                   <Badge variant={r.classification.category}>
-                    {CATEGORY_LABELS[r.classification.category]}
+                    {t(`category.${r.classification.category}`)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right font-mono">
@@ -78,15 +79,15 @@ export function DomainsTable({ results }: Props) {
                   <TableCell colSpan={6} className="bg-muted/20">
                     <div className="space-y-2 py-2 pl-12">
                       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Title
+                        {t("table.row.title")}
                       </p>
                       <p className="text-sm">{r.serp.title}</p>
                       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Snippet
+                        {t("table.row.snippet")}
                       </p>
                       <p className="text-sm text-muted-foreground">{r.serp.snippet}</p>
                       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        Classifier explanation
+                        {t("table.row.explanation")}
                       </p>
                       <p className="font-mono text-xs text-muted-foreground">
                         {r.classification.explanation}
