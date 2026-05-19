@@ -6,12 +6,8 @@ _Append-only timeline of wiki operations on `wiki-en/`. Mirrors [[../wiki/log]].
 Bootstrapped via `llm-wiki@claude-code-skills` v2.3.0. EN mirror structure created
 parallel to primary UA wiki. Source PDF dropped into `raw/`. No pages ingested yet.
 
-## [2026-05-18] create | google-sheets-intake + web-ui-intake + task-queue
-Created 3 EN concept pages mirroring UA wiki. Filed back from `intake/` prototype implementation
-(Node.js + TypeScript + Fastify + SQLite + Google OAuth 2.0). End-to-end smoke test passed locally.
-
-## [2026-05-18] create | synthesis/architecture-overview + 3 mermaid diagrams (PNG/SVG)
-Created architecture-overview synthesis page (EN mirror) with 3 layered diagrams (Task 1, Task 2, Docs).
+## [2026-05-18] create | synthesis/architecture-overview + diagrams (PNG/SVG)
+Created architecture-overview synthesis page (EN mirror) with layered diagrams.
 Generated PNG/SVG assets via mermaid.ink, mirrored from `wiki/assets/diagrams/`. Root `README.md` updated
 to embed diagrams and reviewer quick path. Canva infographic generation tried — produced marketing-style
 outputs, not technical architecture; rejected.
@@ -21,17 +17,12 @@ PNGs removed (raster, blurry on zoom). All image links in README, architecture-o
 point to SVG. Vector → unlimited zoom, accessibility (text stays text), smaller footprint.
 
 ## [2026-05-18] create | task-2-answer synthesis + 4 concepts + 1 entity
-Created EN mirror of task-2-answer.md (sequential reply to 10 PDF Task 2 questions). Added EN concept pages:
+Created EN mirror of task-2-answer.md (sequential reply to PDF questions). Added EN concept pages:
 domain-classification, affiliate-detection, competitor-thief-detection, classifier-scoring. Plus entities/
 starcasino-nl. Forward refs to ADRs, nl-competitor-casinos, openrouter, comparisons remain as expected
 "compounding wiki" pattern.
 
-## [2026-05-18] create | concepts/scaling-bottlenecks (EN mirror)
-Mirror of UA scaling-bottlenecks concept. Detailed answer to PDF Task 1 question about scaling to 1000+ sites/month
-— 8 bottlenecks ranked by severity, mitigations, cost model ($0.24-0.30/page at 50k pages/mo), 5-phase build plan.
-
-## [2026-05-18] delete | remove intake/ (out of PDF scope)
-Task 1 is theoretical-only per PDF brief. The intake/ Node.js prototype was removed (`git rm -r`). Wiki concepts
-(google-sheets-intake, web-ui-intake, task-queue) rewritten as concept-only design (EN mirror updated). Task 1
-architecture diagram regenerated. README and architecture-overview updated. prototype/ folder remains for the
-upcoming Task 2 implementation.
+## [2026-05-19] delete | remove out-of-scope concept pages
+Removed EN pages and assets unrelated to the branded-SERP-monitor deliverable:
+`concepts/{google-sheets-intake,web-ui-intake,task-queue,scaling-bottlenecks}.md`,
+`assets/diagrams/task-1-*`. Edited index, source summary, architecture-overview to drop the cross-refs.

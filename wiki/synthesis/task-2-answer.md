@@ -139,7 +139,7 @@ API endpoint: `GET /api/summary?keyword=starcasino&geo=nl` повертає `{of
 3. **Top domains per category** — таблиця з expand для drill-down (signals + LLM explanation)
 4. **Domain history** — для конкретного домену: всі snapshots, де він з'являвся, його категорії в часі, кількість category-changes
 
-**Деталі:** [[../concepts/dashboard-design]]; запозичує підхід з [[../entities/fastify]] + Chart.js, який вже застосований у [[../concepts/web-ui-intake|intake demo]].
+**Деталі:** [[../concepts/dashboard-design]]; стек — [[../entities/fastify]] + React + Recharts (Chart.js у демо-фікстурах).
 
 ---
 
@@ -164,7 +164,7 @@ API endpoint: `GET /api/summary?keyword=starcasino&geo=nl` повертає `{of
 
 **Коротка відповідь:** Node.js 20 + TypeScript strict + Fastify + Playwright + SQLite + OpenRouter. **У плані** після інших priority робіт. Архітектура повністю описана у [[architecture-overview#Шар 2 — Task 2: Branded SERP Monitor (StarCasino NL)]].
 
-**Stack обґрунтований у:** [[../concepts/adr-005-stack-nodejs]] (узгодженість з [[../concepts/web-ui-intake|intake-сервісом]]); [[../concepts/adr-006-storage-sqlite]] (single-process simplicity); [[../concepts/adr-007-signal-weights]] (rule 0.6 + LLM 0.4 rationale); [[../concepts/adr-008-dual-promote-tiebreak]] (competitor wins).
+**Stack обґрунтований у:** [[../concepts/adr-005-stack-nodejs]]; [[../concepts/adr-006-storage-sqlite]] (single-process simplicity); [[../concepts/adr-007-signal-weights]] (rule 0.6 + LLM 0.4 rationale); [[../concepts/adr-008-dual-promote-tiebreak]] (competitor wins).
 
 **CLI:**
 - `npm run analyze` — реальний run (SerpAPI + Playwright + OpenRouter)
@@ -187,13 +187,7 @@ API endpoint: `GET /api/summary?keyword=starcasino&geo=nl` повертає `{of
 - LLM-класифікація кешується per domain (TTL 7 днів) — більшість доменів стабільні
 - Worker pool через k8s/ECS + Redis queue замість cron, якщо потрібен throughput > 100 snapshots/хв
 
-**Деталі:** [[../concepts/scaling-bottlenecks]] (forward ref).
-
----
-
-## Зв'язок з Task 1
-
-Класифіковані як `affiliate` домени з Task 2 — це **competitor intelligence input** для content generation pipeline в Task 1 ([[architecture-overview#Cross-layer integration]]). А дашборд Task 2 може **показувати impact** SEO-сторінок, створених через Task 1 (їх rankings по бренд-запитах).
+**Деталі:** конкретні bottlenecks (RAM на Playwright, AI rate limits, обмеження Cloudflare Pages) і обхідні шляхи описані inline в прототипі та в [[../concepts/classifier-scoring]].
 
 ---
 
@@ -202,5 +196,5 @@ API endpoint: `GET /api/summary?keyword=starcasino&geo=nl` повертає `{of
 - [[../sources/kraken-leads-test-task]] — оригінальне завдання
 - [[architecture-overview]] — діаграми
 - [[../concepts/domain-classification]], [[../concepts/affiliate-detection]], [[../concepts/competitor-thief-detection]], [[../concepts/classifier-scoring]]
-- [[../entities/starcasino-nl]], [[../entities/nl-competitor-casinos]]
-- [[task-1-answer]] (ще не створено)
+- [[../entities/starcasino-nl]]
+- [[../comparisons/affiliate-vs-brand-thief-signals]]

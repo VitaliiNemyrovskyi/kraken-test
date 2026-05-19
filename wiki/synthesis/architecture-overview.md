@@ -1,10 +1,10 @@
 ---
 title: Architecture overview
 category: synthesis
-summary: Високорівнева архітектура обох задач — генерація SEO-сайтів (Task 1) та моніторинг брендованої видачі (Task 2) — плюс шар документації Karpathy-wiki
-tags: [overview, architecture, task1, task2, diagram]
+summary: Високорівнева архітектура моніторингу брендованої видачі StarCasino плюс шар документації Karpathy-wiki
+tags: [overview, architecture, diagram]
 sources: 1
-updated: 2026-05-18
+updated: 2026-05-19
 lang: ua
 mirror: ../../wiki-en/synthesis/architecture-overview.md
 ---
@@ -12,63 +12,13 @@ mirror: ../../wiki-en/synthesis/architecture-overview.md
 # Architecture overview
 
 ## TL;DR
-Проект складається з трьох незалежних, але семантично пов'язаних шарів: (1) **Task 1** — концепція системи генерації SEO-сайтів (intake → queue → pipeline → publish) — за PDF лише теоретична частина; (2) **Task 2** — концепція + робочий прототип моніторингу брендованої видачі з класифікатором; (3) **документація** — Karpathy LLM-Wiki з atomic-pages в UA+EN. Реалізовано: вся wiki + 12 atomic concepts; Task 2 prototype — у плані.
+Проект складається з двох незалежних, але семантично пов'язаних шарів: (1) **робочий прототип моніторингу брендованої видачі StarCasino** з класифікатором; (2) **документація** — Karpathy LLM-Wiki з atomic-pages в UA+EN.
 
 ---
 
-## Шар 1 — Task 1: SEO Automation System
+## Шар 1 — Branded SERP Monitor (StarCasino NL)
 
-![Task 1 Architecture](../assets/diagrams/task-1-architecture.svg)
-
-> 📄 [Mermaid source](../assets/diagrams/task-1-architecture.mmd) (для редагування/regen)
-
-<details>
-<summary>Mermaid source (inline)</summary>
-
-```mermaid
-flowchart LR
-    subgraph SOURCES["Task intake (концепція)"]
-      direction TB
-      S1["📊 Google Sheets<br/><i>OAuth 2.0 + 60s polling</i>"]
-      S2["📝 Web Form UI<br/><i>HTTP form + REST</i>"]
-    end
-
-    I["Intake Service<br/><i>OAuth + polling worker</i>"]
-    Q[("Unified Task Queue<br/>state machine + idempotency")]
-    SIM["Status Tracker<br/>(queued → … → published)"]
-
-    subgraph PIPE["Pipeline (концепція)"]
-      direction LR
-      P1["SERP Analysis<br/><i>SerpAPI / DataForSEO</i>"]
-      P2["Competitor Scraping<br/><i>Playwright + Readability</i>"]
-      P3["Topical Brief<br/><i>LLM clustering</i>"]
-      P4["AI Content<br/><i>Claude Sonnet via OpenRouter</i>"]
-      P5["HTML + SEO<br/><i>Astro + Schema.org</i>"]
-      P6["Deploy<br/><i>Cloudflare Pages API</i>"]
-      P1 --> P2 --> P3 --> P4 --> P5 --> P6
-    end
-
-    S1 -->|"polling"| I
-    S2 -->|"POST /api/tasks"| I
-    I --> Q
-    Q --> SIM
-    SIM -.->|"коли task source='sheet'"| S1
-    SIM ---> PIPE
-    PIPE -->|"output URL"| SIM
-
-    style SOURCES fill:#1a2332,stroke:#4ea1ff,color:#e4e7ee
-    style PIPE fill:#2a1a2a,stroke:#b06bff,color:#e4e7ee,stroke-dasharray: 5 5
-```
-
-</details>
-
-**Ключові концепти:** [[../concepts/google-sheets-intake]], [[../concepts/web-ui-intake]], [[../concepts/task-queue]] (реалізовано); [[../concepts/serp-collection]], [[../concepts/competitor-scraping]], [[../concepts/content-generation-pipeline]], [[../concepts/seo-quality-control]], [[../concepts/html-schema-markup]], [[../concepts/cloudflare-deployment]] (концепція).
-
----
-
-## Шар 2 — Task 2: Branded SERP Monitor (StarCasino NL)
-
-![Task 2 Architecture](../assets/diagrams/task-2-architecture.svg)
+![Branded SERP Monitor Architecture](../assets/diagrams/task-2-architecture.svg)
 
 > 📄 [Mermaid source](../assets/diagrams/task-2-architecture.mmd) (для редагування/regen)
 
@@ -85,7 +35,7 @@ flowchart TB
       direction LR
       R["Rule signals<br/>• domain match<br/>• outbound link ratios<br/>• affiliate-param regex<br/>• redirect chain<br/>• CTA destination"]
       L["LLM signal<br/><i>Claude Opus 4.7<br/>via OpenRouter</i><br/>JSON structured output"]
-      SCORE{Combined<br/>score ≥ 40}
+      SCORE{Combined<br/>score ≥ 30}
       R --> SCORE
       L --> SCORE
     end
@@ -127,7 +77,7 @@ flowchart TB
 
 ---
 
-## Шар 3 — Documentation (Karpathy LLM-Wiki)
+## Шар 2 — Documentation (Karpathy LLM-Wiki)
 
 ![Documentation Layer](../assets/diagrams/docs-layer.svg)
 
@@ -183,17 +133,8 @@ flowchart LR
 
 ---
 
-## Cross-layer integration
-
-Шар 1 (intake) і Шар 2 (monitor) не пов'язані прямо в runtime — це **дві окремі задачі** з тестового завдання. Але концептуально:
-
-- Класифіковані домени з Task 2 (наприклад, affiliate-сайти, що ведуть на StarCasino) можуть стати **competitor intelligence input** для content generation pipeline в Task 1 (Phase 5 в [[phase-plan]]).
-- Дашборд Task 2 може **показувати impact** SEO-сайтів, створених через Task 1 (відстеження їх position у видачі по бренд-запитах).
-
-Цей крос-зв'язок описано як stretch goal у [[../concepts/scaling-bottlenecks]] (production phase).
-
 ## Related
 - [[../sources/kraken-leads-test-task]]
-- [[task-1-answer]] (ще не створено) — sequential відповідь на PDF Task 1
-- [[task-2-answer]] (ще не створено) — sequential відповідь на PDF Task 2
-- [[../concepts/google-sheets-intake]], [[../concepts/web-ui-intake]], [[../concepts/task-queue]]
+- [[task-2-answer]] — sequential відповідь на PDF
+- [[../concepts/domain-classification]], [[../concepts/affiliate-detection]], [[../concepts/competitor-thief-detection]], [[../concepts/classifier-scoring]]
+- [[../comparisons/affiliate-vs-brand-thief-signals]]

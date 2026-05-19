@@ -11,10 +11,9 @@ You are the maintainer of this wiki and the architect of the prototype. You read
 
 ## Project context
 
-Kraken Leads is an iGaming affiliate company. The test task has two parts:
+Kraken Leads is an iGaming affiliate company. The deliverable covered in this repo:
 
-- **Task 1 (theoretical):** Design a fully automated SEO-site generation system — Google Sheets intake → SERP analysis → competitor scraping → AI content → HTML → Cloudflare Pages, with selective regeneration. Output: design doc covering 10 sub-questions, scaling, tech choices, phase plan, estimates.
-- **Task 2 (theoretical + working prototype):** Branded SERP monitoring for **StarCasino (NL)** — automatically classify domains in top-10 SERP into three buckets: `official`, `affiliate` (sends traffic to starcasino.nl), `competitor_brand_thief` (uses brand to divert traffic to other casinos). Output: concept doc + working Node.js/TypeScript prototype with dashboard.
+- **Branded SERP monitoring for StarCasino (NL)** — automatically classify domains in top-10 SERP into three buckets: `official`, `affiliate` (sends traffic to starcasino.nl), `competitor_brand_thief` (uses brand to divert traffic to other casinos). Output: concept doc + working Node.js/TypeScript prototype with dashboard.
 
 Original requirements: [[sources/kraken-leads-test-task]] (raw: `raw/kraken-leads-test-task.pdf`).
 
@@ -47,13 +46,13 @@ wiki/                                 # Ukrainian (primary, matches task languag
 ├── concepts/                         # SERP collection, classification, content gen pipeline, ADRs, phases
 ├── sources/                          # One summary page per ingested source
 ├── comparisons/                      # SerpAPI vs DataForSEO, Affiliate vs Brand-Thief, etc.
-├── synthesis/                        # task-1-answer, task-2-answer, architecture overview, phase plan
+├── synthesis/                        # task-2-answer, architecture overview, phase plan
 └── .templates/                       # Page templates (reference only)
 
 wiki-en/                              # English mirror
 └── (same structure as wiki/)
 
-prototype/                            # Node.js/TypeScript Task 2 implementation
+prototype/                            # Node.js/TypeScript implementation
 ├── package.json
 ├── src/
 │   ├── serp/
@@ -88,8 +87,7 @@ Wikis are organized around iGaming-SEO domain:
   - `serpapi-vs-dataforseo.md`, `serpapi-vs-playwright-scrape.md`, `affiliate-vs-brand-thief-signals.md`, `astro-vs-eleventy.md`, `cloudflare-vs-vercel.md`
 
 - **`synthesis/`** — high-level overviews and task answers:
-  - `task-1-answer.md` — sequential answer to all 10 PDF questions of Task 1 with `[[wikilinks]]` to details
-  - `task-2-answer.md` — sequential answer to all PDF questions of Task 2
+  - `task-2-answer.md` — sequential answer to all PDF questions
   - `architecture-overview.md` — combined view
   - `cost-model.md`, `scaling-analysis.md`
 
@@ -127,8 +125,8 @@ ingested: YYYY-MM-DD
 3. **Every wiki page has YAML frontmatter** (see above; includes `lang` and `mirror`).
 4. **UA is the primary language.** Create page in `wiki/` first, then mirror to `wiki-en/`. Both must stay in sync.
 5. **Every claim has a citation.** Link to `[[sources/...]]` page or external URL.
-6. **`synthesis/task-1-answer.md` and `synthesis/task-2-answer.md` must cover every sub-question of the PDF.** These are the primary deliverable views.
-7. **For prototype code (Task 2), apply karpathy-coder principles** (see below).
+6. **`synthesis/task-2-answer.md` must cover every sub-question of the PDF.** This is the primary deliverable view.
+7. **For prototype code, apply karpathy-coder principles** (see below).
 8. **`wiki-en/` filenames mirror `wiki/`** (same kebab-case).
 9. **Contradictions get flagged inline** with `> ⚠️ Contradiction:` and link both sides.
 10. **Good answers get filed back** as new `comparisons/` or `synthesis/` pages.
@@ -204,14 +202,9 @@ When working on this project, invoke these skills via the Skill tool:
 
 | Phase / Task | Skills to invoke |
 |---|---|
-| Task 1: System design | `engineering:system-design`, `engineering:architecture` |
-| Task 1: Content gen pipeline knowledge | `marketing:content-creation`, `brand-voice:generate-guidelines`, `marketing:brand-review` |
-| Task 1: SEO knowledge | `marketing:seo-audit` |
-| Task 1: Competitor analysis pattern | `marketing:competitive-brief` |
-| Task 1: Deployment | `engineering:deploy-checklist` |
-| Task 2: Domain classification logic | `marketing:competitive-brief`, `marketing:seo-audit` |
-| Task 2: Dashboard | `data:build-dashboard`, `data:create-viz`, `ui-styling`, `design:design-system` |
-| Task 2: SQL schema | `data:sql-queries` |
+| Domain classification logic | `marketing:competitive-brief`, `marketing:seo-audit` |
+| Dashboard | `data:build-dashboard`, `data:create-viz`, `ui-styling`, `design:design-system` |
+| SQL schema | `data:sql-queries` |
 | Prototype quality | `karpathy-coder:*` (slash: `/karpathy-check`) |
 | Wiki ops | `llm-wiki:*` (slashes: `/wiki-ingest`, `/wiki-query`, `/wiki-lint`) |
 | Wiki maintenance | `engineering:documentation` |

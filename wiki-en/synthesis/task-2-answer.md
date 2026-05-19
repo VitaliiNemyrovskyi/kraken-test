@@ -139,7 +139,7 @@ API endpoint: `GET /api/summary?keyword=starcasino&geo=nl` returns `{official: 1
 3. **Top domains per category** — table with expand for drill-down (signals + LLM explanation)
 4. **Domain history** — for a specific domain: every snapshot it appeared in, its categories over time, total category-changes
 
-**Details:** [[../concepts/dashboard-design]]; borrows from [[../entities/fastify]] + Chart.js already used in the [[../concepts/web-ui-intake|intake demo]].
+**Details:** [[../concepts/dashboard-design]]; stack — [[../entities/fastify]] + React + Recharts (Chart.js in demo fixtures).
 
 ---
 
@@ -164,7 +164,7 @@ Exact list to come from a real SERP fetch in [[#9. Practical prototype|the proto
 
 **Short:** Node.js 20 + TypeScript strict + Fastify + Playwright + SQLite + OpenRouter. **Planned** after other priority work. Architecture fully described in [[architecture-overview#Layer 2 — Task 2: Branded SERP Monitor (StarCasino NL)]].
 
-**Stack rationale:** [[../concepts/adr-005-stack-nodejs]] (consistency with [[../concepts/web-ui-intake|intake service]]); [[../concepts/adr-006-storage-sqlite]] (single-process simplicity); [[../concepts/adr-007-signal-weights]] (rule 0.6 + LLM 0.4 rationale); [[../concepts/adr-008-dual-promote-tiebreak]] (competitor wins).
+**Stack rationale:** [[../concepts/adr-005-stack-nodejs]]; [[../concepts/adr-006-storage-sqlite]] (single-process simplicity); [[../concepts/adr-007-signal-weights]] (rule 0.6 + LLM 0.4 rationale); [[../concepts/adr-008-dual-promote-tiebreak]] (competitor wins).
 
 **CLI:**
 - `npm run analyze` — real run (SerpAPI + Playwright + OpenRouter)
@@ -187,13 +187,7 @@ Exact list to come from a real SERP fetch in [[#9. Practical prototype|the proto
 - LLM classification is cached per domain (TTL 7 days) — most domains are stable
 - Worker pool via k8s/ECS + Redis queue replaces cron when throughput exceeds ~100 snapshots/min
 
-**Details:** [[../concepts/scaling-bottlenecks]] (forward ref).
-
----
-
-## Cross-link to Task 1
-
-Domains classified as `affiliate` in Task 2 become **competitor intelligence input** for the content generation pipeline of Task 1 ([[architecture-overview#Cross-layer integration]]). Conversely, the Task 2 dashboard can **show impact** of SEO pages generated through Task 1 (their rankings on brand queries).
+**Details:** specific bottlenecks (Playwright RAM, AI rate limits, Cloudflare Pages caps) and mitigations are described inline in the prototype and in [[../concepts/classifier-scoring]].
 
 ---
 
@@ -202,5 +196,5 @@ Domains classified as `affiliate` in Task 2 become **competitor intelligence inp
 - [[../sources/kraken-leads-test-task]] — original brief
 - [[architecture-overview]] — diagrams
 - [[../concepts/domain-classification]], [[../concepts/affiliate-detection]], [[../concepts/competitor-thief-detection]], [[../concepts/classifier-scoring]]
-- [[../entities/starcasino-nl]], [[../entities/nl-competitor-casinos]]
-- [[task-1-answer]] (not yet created)
+- [[../entities/starcasino-nl]]
+- [[../comparisons/affiliate-vs-brand-thief-signals]]
